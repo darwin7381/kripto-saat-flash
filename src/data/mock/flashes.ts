@@ -150,6 +150,9 @@ export const mockFlashes: Flash[] = Array.from({ length: 100 }, (_, index) => {
   const author = randomPick(mockAuthors, 1)[0];
   const publishedAt = randomRecentDate();
   
+  // 隨機設置某些快訊為重要（約20%的機率）
+  const isImportant = Math.random() < 0.2;
+  
   return {
     id: index + 1,
     title: template.title,
@@ -175,6 +178,7 @@ export const mockFlashes: Flash[] = Array.from({ length: 100 }, (_, index) => {
       views: Math.floor(Math.random() * 10000) + 100,
       reading_time: Math.floor(Math.random() * 5) + 1,
     },
+    isImportant: isImportant,
   };
 });
 

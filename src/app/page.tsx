@@ -1,103 +1,94 @@
-import Image from "next/image";
+import { Metadata } from 'next';
+import { apiService } from '@/lib/api';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import FlashNewsCard from '@/components/flash/FlashNewsCard';
+import MarketSidebar from '@/components/market/MarketSidebar';
+import FloatingButtons from '@/components/ui/FloatingButtons';
+import Link from 'next/link';
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: '比特币资讯网_区块链快讯_数字货币资讯 -币世界|币圈事早知道',
+  description: '币世界网-比特币等数字货币交易所导航、投资理财、快讯、深度、币圈、市场行情第一站。',
+};
+
+export default async function HomePage() {
+  // 獲取快訊數據
+  const flashData = await apiService.getHotFlashes(1, 10);
+  
+  // 獲取今天的日期
+  const today = new Date();
+  const dateString = today.toLocaleDateString('zh-CN', { 
+    month: '2-digit', 
+    day: '2-digit',
+    weekday: 'long'
+  });
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
+      <Header />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Main Content */}
+      <main className="max-w-[1200px] mx-auto px-4 py-6 flex-1 w-full">
+        <div className="flex gap-5">
+          {/* Left Column - News */}
+          <div className="flex-1 max-w-[820px]">
+            {/* News Header */}
+            <div className="bg-white rounded-t-lg border-b border-[#e8e8e8] px-6 py-4">
+              <div className="flex items-center justify-between">
+                <h1 className="text-[18px] font-normal text-[#333]">币世界快讯</h1>
+                <div className="flex items-center border border-[#ddd] rounded px-3 py-1.5">
+                  <input 
+                    type="text" 
+                    placeholder="输入关键字" 
+                    className="text-sm outline-none bg-transparent w-32 placeholder-[#999]"
+                  />
+                  <svg className="w-4 h-4 text-[#999] ml-2 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Date Header */}
+            <div className="bg-[#f9f9f9] px-6 py-2 border-b border-[#e8e8e8]">
+              <span className="text-xs text-[#999]">今天 ，{dateString}</span>
+            </div>
+
+            {/* News List */}
+            <div className="bg-white rounded-b-lg">
+              {flashData.flashes.map((flash) => (
+                <FlashNewsCard 
+                  key={flash.id} 
+                  flash={flash} 
+                  isImportant={flash.isImportant}
+                />
+              ))}
+            </div>
+
+            {/* Load More */}
+            <div className="bg-white rounded-b-lg px-6 py-4 text-center border-t border-[#e8e8e8]">
+              <Link 
+                href="/flash" 
+                className="text-[#5B7BFF] hover:text-[#4a6ae6] text-sm font-normal inline-flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                加载更多
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="w-[340px] hidden lg:block">
+            <MarketSidebar />
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <Footer />
+      <FloatingButtons />
     </div>
   );
 }

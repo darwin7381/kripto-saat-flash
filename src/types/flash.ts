@@ -23,6 +23,7 @@ export interface Flash {
     views?: number;
     reading_time?: number;
   };
+  isImportant?: boolean;
 }
 
 export interface Category {
