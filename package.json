@@ -1,27 +1,57 @@
 {
   "name": "kripto-saat-flash",
   "version": "0.1.0",
+  "description": "Kripto Saat Flash - Next.js based cryptocurrency news flash system for Turkish market",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.4"
+    "react": "^18",
+    "react-dom": "^18",
+    "next": "15.1.4",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.469.0",
+    "@radix-ui/react-slot": "^1.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.5"
   },
   "devDependencies": {
     "typescript": "^5",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.4",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@tailwindcss/postcss": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "eslint": "^8",
+    "eslint-config-next": "15.1.4",
     "@eslint/eslintrc": "^3"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "news",
+    "flash",
+    "bitcoin",
+    "ethereum",
+    "defi",
+    "nft",
+    "blockchain",
+    "türkiye",
+    "nextjs",
+    "strapi"
+  ],
+  "author": "Kripto Saat Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kripto-saat/flash-system"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
