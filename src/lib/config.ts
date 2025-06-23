@@ -40,6 +40,7 @@ export const config = {
     itemsPerPage: 25, // 每頁快訊數量
     hotPagesLimit: 10, // 熱門頁面限制（系統一）
     segmentSize: 25, // 歷史區段大小（系統二）
+    updateCheckInterval: 60000, // 更新檢查間隔（毫秒）- 1分鐘
   },
 
   // Development Configuration

@@ -3,19 +3,20 @@ import { apiService } from '@/lib/api';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { segmentId: string } }
+  { params }: { params: Promise<{ segmentId: string }> }
 ) {
   try {
-    const segmentId = parseInt(params.segmentId, 10);
+    const { segmentId } = await params;
+    const segmentIdNum = parseInt(segmentId, 10);
 
-    if (isNaN(segmentId) || segmentId < 1) {
+    if (isNaN(segmentIdNum) || segmentIdNum < 1) {
       return NextResponse.json(
         { error: 'Invalid segment ID' },
         { status: 400 }
       );
     }
 
-    const data = await apiService.getSegmentFlashes(segmentId);
+    const data = await apiService.getSegmentFlashes(segmentIdNum);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching segment flashes:', error);
