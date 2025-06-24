@@ -17,18 +17,39 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
     return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
-  // 模擬市場標籤數據
-  const marketTags = [
-    { name: "BTC", change: "+1.74%", type: "up" },
-    { name: "ETH", change: "-2.12%", type: "down" }
-  ];
+  // 使用 flash.id 生成確定性的市場標籤數據
+  const getMarketTags = (id: number) => {
+    const tags = [
+      { name: "BTC", change: "+1.74%", type: "up" },
+      { name: "ETH", change: "-2.12%", type: "down" },
+      { name: "USDT", change: "+0.01%", type: "up" },
+      { name: "BNB", change: "+3.45%", type: "up" },
+      { name: "XRP", change: "-1.23%", type: "down" }
+    ];
+    
+    // 根據 id 選擇 0-3 個標籤
+    const tagCount = (id % 4);
+    if (tagCount === 0) return [];
+    
+    const selectedTags = [];
+    for (let i = 0; i < tagCount; i++) {
+      selectedTags.push(tags[(id + i) % tags.length]);
+    }
+    return selectedTags;
+  };
 
-  // 模擬看多看空數據
-  const bullish = Math.floor(Math.random() * 100) + 1;
-  const bearish = Math.floor(Math.random() * 100) + 1;
+  // 使用 flash.id 生成確定性的看多看空數據
+  const getBullishBearish = (id: number) => {
+    const bullish = 20 + (id * 7) % 80;
+    const bearish = 15 + (id * 11) % 85;
+    return { bullish, bearish };
+  };
 
-  // 判斷是否有查看原文鏈接
-  const hasSourceLink = Math.random() > 0.5;
+  // 使用 flash.id 確定是否有查看原文鏈接
+  const hasSourceLink = flash.id % 3 !== 0;
+
+  const marketTags = getMarketTags(flash.id);
+  const { bullish, bearish } = getBullishBearish(flash.id);
 
   return (
     <div className="relative group hover:bg-[#fafafa] transition-colors">
@@ -42,11 +63,11 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
             </span>
             {/* 圓點容器 */}
             <div className="relative w-[30px] flex justify-center">
-              {/* 圓點 - 添加 z-10 確保在垂直線上方 */}
-              <div className="w-[7px] h-[7px] bg-[#dcdcdc] rounded-full mt-[8.5px] z-10 relative"></div>
+              {/* 圓點 - 設置 relative 定位和 z-index 確保在時間軸線之上 */}
+              <div className="w-[7px] h-[7px] bg-[#dcdcdc] rounded-full mt-[8.5px] relative z-10"></div>
             </div>
           </div>
-          {/* 垂直線 - 絕對定位 */}
+          {/* 垂直線 - 絕對定位，z-index 默認為 0 */}
           <div className="absolute left-[85px] top-0 bottom-0 w-[1px] bg-[#f2f2f2]"></div>
         </div>
 

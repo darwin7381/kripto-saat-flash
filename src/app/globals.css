@@ -120,3 +120,69 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Flash List Styles */
+.flash-list-container {
+  position: relative;
+  background-color: white;
+}
+
+.date-group {
+  position: relative;
+}
+
+.date-separator {
+  /* 確保 sticky 行為正常運作 */
+  will-change: transform;
+}
+
+.flash-list {
+  background-color: white;
+  position: relative;
+}
+
+/* Date Section Styles */
+.date-section {
+  position: relative;
+}
+
+/* Sticky Date Wrapper */
+.sticky-date-wrapper {
+  position: sticky;
+  top: 113px; /* Header 總高度 (56px + 57px) */
+  z-index: 10;
+}
+
+/* Date Label */
+.date-label {
+  background-color: #f9f9f9;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e5e5;
+  position: relative;
+}
+
+/* 確保較新的日期標籤在上層 */
+.date-label[data-date-index="0"] {
+  z-index: 10;
+}
+.date-label[data-date-index="1"] {
+  z-index: 9;
+}
+.date-label[data-date-index="2"] {
+  z-index: 8;
+}
+.date-label[data-date-index="3"] {
+  z-index: 7;
+}
+.date-label[data-date-index="4"] {
+  z-index: 6;
+}
+.date-label[data-date-index="5"] {
+  z-index: 5;
+}
+
+/* Flash Items */
+.flash-items {
+  background-color: white;
+  position: relative;
+}

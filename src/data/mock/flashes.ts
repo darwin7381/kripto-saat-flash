@@ -20,6 +20,21 @@ function randomRecentDate(): string {
   return date.toISOString();
 }
 
+// 獲取日期
+const now = new Date();
+const today = new Date(now);
+const yesterday = new Date(now);
+yesterday.setDate(yesterday.getDate() - 1);
+const dayBeforeYesterday = new Date(now);
+dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
+
+// 設置具體時間
+const setTime = (date: Date, hours: number, minutes: number) => {
+  const newDate = new Date(date);
+  newDate.setHours(hours, minutes, 0, 0);
+  return newDate.toISOString();
+};
+
 // 假快訊內容模板（基於競品真實內容）
 const flashTemplates = [
   {
@@ -148,7 +163,25 @@ const flashTemplates = [
 export const mockFlashes: Flash[] = Array.from({ length: 100 }, (_, index) => {
   const template = flashTemplates[index % flashTemplates.length];
   const author = randomPick(mockAuthors, 1)[0];
-  const publishedAt = randomRecentDate();
+  
+  // 設置發布時間
+  let publishedAt: string;
+  if (index < 5) {
+    // 前5條是今天的
+    const hours = 16 - index * 2; // 16:00, 14:00, 12:00, 10:00, 8:00
+    publishedAt = setTime(today, hours, Math.floor(Math.random() * 60));
+  } else if (index < 10) {
+    // 接下來5條是昨天的
+    const hours = 22 - (index - 5) * 3; // 22:00, 19:00, 16:00, 13:00, 10:00
+    publishedAt = setTime(yesterday, hours, Math.floor(Math.random() * 60));
+  } else if (index < 15) {
+    // 再接下來5條是前天的
+    const hours = 20 - (index - 10) * 3; // 20:00, 17:00, 14:00, 11:00, 8:00
+    publishedAt = setTime(dayBeforeYesterday, hours, Math.floor(Math.random() * 60));
+  } else {
+    // 其餘的使用隨機日期
+    publishedAt = randomRecentDate();
+  }
   
   // 隨機設置某些快訊為重要（約20%的機率）
   const isImportant = Math.random() < 0.2;

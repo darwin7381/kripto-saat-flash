@@ -19,7 +19,7 @@ export default function FloatingButtons() {
   };
 
   return (
-    <div className="fixed right-4 bottom-20 space-y-3 z-50">
+    <div className="fixed right-4 bottom-20 space-y-3 z-40">
       {/* 回到頂部 */}
       {showScrollTop && (
         <button 
