@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiService } from '@/lib/api';
 import { config } from '@/lib/config';
 import Header from '@/components/layout/Header';
@@ -15,80 +15,38 @@ export default function FlashPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const loadingRef = useRef(false);
 
-  // 加載更多快訊
-  const loadMoreFlashes = useCallback(async () => {
-    if (loadingRef.current || !hasMore) return;
-
-    loadingRef.current = true;
+  // 加載快訊
+  const loadFlashes = async (pageNum: number) => {
     setLoading(true);
-    setError(null);
-
     try {
-      const flashData = await apiService.getHotFlashes(page, config.api.itemsPerPage);
+      const flashData = await apiService.getHotFlashes(pageNum, config.api.itemsPerPage);
       
-      if (flashData.flashes.length === 0) {
-        setHasMore(false);
+      if (pageNum === 1) {
+        setFlashes(flashData.flashes);
       } else {
         setFlashes(prev => [...prev, ...flashData.flashes]);
-        setPage(prev => prev + 1);
-        setHasMore(flashData.pagination.hasNext);
       }
+      
+      setHasMore(flashData.pagination.hasNext);
     } catch (err) {
-      setError('載入快訊時發生錯誤');
       console.error('Error loading flashes:', err);
     } finally {
       setLoading(false);
-      loadingRef.current = false;
     }
-  }, [page, hasMore]);
+  };
 
   // 初始加載
   useEffect(() => {
-    loadMoreFlashes();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    loadFlashes(1);
+  }, []);
 
-  // 無限滾動監聽
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + document.documentElement.scrollTop 
-        >= document.documentElement.offsetHeight - 1000) {
-        loadMoreFlashes();
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [loadMoreFlashes]);
-
-  if (error && flashes.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
-        <Header />
-        
-        <main className="max-w-[1200px] mx-auto px-4 py-8 flex-1">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-[#333] mb-4">
-              发生错误
-            </h1>
-            <p className="text-[#666] mb-4">
-              {error}
-            </p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="bg-[#5B7BFF] text-white px-4 py-2 rounded-md hover:bg-[#4a6ae6] transition-colors"
-            >
-              重新载入
-            </button>
-          </div>
-        </main>
-        
-        <Footer />
-      </div>
-    );
-  }
+  // 加載更多
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    loadFlashes(nextPage);
+  };
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
@@ -99,7 +57,7 @@ export default function FlashPage() {
           {/* Left Column - News */}
           <div className="flex-1 max-w-[820px]">
             {/* News Header */}
-            <div className="bg-white rounded-t-lg border-b border-[#e8e8e8] px-6 py-4 news-header">
+            <div className="bg-white rounded-lg px-6 py-4 news-header border-b border-[#e8e8e8]">
               <div className="flex items-center justify-between">
                 <h1 className="text-[18px] font-normal text-[#333]">币世界快讯</h1>
                 <div className="flex items-center border border-[#ddd] rounded px-3 py-1.5">
@@ -115,42 +73,50 @@ export default function FlashPage() {
               </div>
             </div>
 
-            {/* 快訊列表容器 */}
-            <div className="bg-white">
+            {/* 快訊列表 */}
+            <div className="bg-white rounded-lg mt-[-1px]">
               {loading && flashes.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p>加載中...</p>
+                  <p className="text-[#666]">加載中...</p>
                 </div>
               ) : (
                 <FlashListContainer flashes={flashes} />
               )}
             </div>
-
-            {/* Loading State */}
-            {loading && (
-              <div className="bg-white px-6 py-8 text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#5B7BFF]"></div>
-                <p className="text-[#666] mt-2">加载中...</p>
-              </div>
-            )}
-
-            {/* No More Content */}
-            {!hasMore && flashes.length > 0 && (
-              <div className="bg-white px-6 py-8 text-center border-t border-[#e8e8e8]">
-                <p className="text-[#999] text-sm">已加载全部快讯</p>
-              </div>
-            )}
-
-            {/* Error State */}
-            {error && flashes.length > 0 && (
-              <div className="bg-white px-6 py-4 text-center border-t border-[#e8e8e8]">
-                <p className="text-red-500 text-sm">{error}</p>
-                <button 
-                  onClick={loadMoreFlashes}
-                  className="mt-2 text-[#5B7BFF] hover:text-[#4a6ae6] text-sm"
+            
+            {/* 加載更多按鈕 - 獨立的白底容器 */}
+            {hasMore && flashes.length > 0 && (
+              <div className="bg-white rounded-lg mt-4">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loading}
+                  className="w-full py-4 flex items-center justify-center gap-2 text-[#5B7BFF] hover:text-[#8da1ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
                 >
-                  重试
+                  {/* 雙箭頭向下圖標 */}
+                  <svg 
+                    className="w-5 h-5 group-hover:text-[#8da1ff] transition-colors" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M19 13l-7 7-7-7m14-8l-7 7-7-7" 
+                    />
+                  </svg>
+                  <span className="text-[14px] font-normal group-hover:text-[#8da1ff] transition-colors">
+                    {loading ? '加載中...' : '加載更多'}
+                  </span>
                 </button>
+              </div>
+            )}
+            
+            {/* 已加載全部 */}
+            {!hasMore && flashes.length > 0 && (
+              <div className="bg-white rounded-lg mt-4 py-4 text-center">
+                <p className="text-[#999] text-sm">已加載全部快訊</p>
               </div>
             )}
           </div>
