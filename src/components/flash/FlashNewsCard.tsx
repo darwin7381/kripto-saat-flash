@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Flash } from '@/types/flash';
 import { ThumbsUp, ThumbsDown, Share2, ExternalLink } from 'lucide-react';
@@ -11,6 +11,8 @@ interface FlashNewsCardProps {
 }
 
 export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsCardProps) {
+  const [showImageModal, setShowImageModal] = useState(false);
+
   // 格式化時間 - 只顯示時分
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -111,13 +113,45 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
 
           {/* 圖片 */}
           {flash.featured_image && (
-            <div className="mb-2">
-              <img 
-                src={flash.featured_image.url} 
-                alt={flash.featured_image.alt || flash.title}
-                className="max-w-full h-auto rounded cursor-pointer hover:opacity-90 transition-opacity"
-              />
-            </div>
+            <>
+              <div className="mb-2">
+                <div 
+                  className="w-[300px] h-[160px] rounded overflow-hidden cursor-pointer hover:opacity-90 transition-opacity bg-[#f5f5f5]"
+                  onClick={() => setShowImageModal(true)}
+                >
+                  <img 
+                    src={flash.featured_image.url} 
+                    alt={flash.featured_image.alt || flash.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+
+              {/* 圖片放大模態框 */}
+              {showImageModal && (
+                <div 
+                  className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4"
+                  onClick={() => setShowImageModal(false)}
+                >
+                  <div className="relative max-w-[90vw] max-h-[90vh]">
+                    <img 
+                      src={flash.featured_image.url} 
+                      alt={flash.featured_image.alt || flash.title}
+                      className="max-w-full max-h-[90vh] object-contain"
+                    />
+                    <button 
+                      className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+                      onClick={() => setShowImageModal(false)}
+                      aria-label="關閉圖片"
+                    >
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* 操作欄 */}
