@@ -1,62 +1,42 @@
-"use client";
-
-import React, { useState, useEffect } from 'react';
 import { apiService } from '@/lib/api';
 import { config } from '@/lib/config';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import FlashListContainer from '@/components/flash/FlashListContainer';
-import MarketSidebar from '@/components/market/MarketSidebar';
-import FloatingButtons from '@/components/ui/FloatingButtons';
+import { Metadata } from 'next';
 import { Flash } from '@/types/flash';
+import FlashListContainer from '@/components/flash/FlashListContainer';
+import ClientLayout from '@/components/layout/ClientLayout';
+import LoadMoreButton from '@/components/flash/LoadMoreButton';
+import MarketSidebar from '@/components/market/MarketSidebar';
 
-export default function FlashPage() {
-  const [flashes, setFlashes] = useState<Flash[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+export const metadata: Metadata = {
+  title: '币世界快讯 - Kripto Saat',
+  description: '获取最新的加密货币快讯和市场动态',
+  openGraph: {
+    title: '币世界快讯 - Kripto Saat',
+    description: '获取最新的加密货币快讯和市场动态',
+    type: 'website',
+  },
+};
 
-  // 加載快訊
-  const loadFlashes = async (pageNum: number) => {
-    setLoading(true);
-    try {
-      const flashData = await apiService.getHotFlashes(pageNum, config.api.itemsPerPage);
-      
-      if (pageNum === 1) {
-        setFlashes(flashData.flashes);
-      } else {
-        setFlashes(prev => [...prev, ...flashData.flashes]);
-      }
-      
-      setHasMore(flashData.pagination.hasNext);
-    } catch (err) {
-      console.error('Error loading flashes:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 初始加載
-  useEffect(() => {
-    loadFlashes(1);
-  }, []);
-
-  // 加載更多
-  const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    loadFlashes(nextPage);
-  };
+export default async function FlashPage() {
+  // 在服務器端獲取初始數據
+  let initialFlashes: Flash[] = [];
+  let hasMore = true;
+  
+  try {
+    const flashData = await apiService.getHotFlashes(1, config.api.itemsPerPage);
+    initialFlashes = flashData.flashes;
+    hasMore = flashData.pagination.hasNext;
+  } catch (error) {
+    console.error('Error fetching initial flashes:', error);
+  }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
-      <Header />
-      
+    <ClientLayout>
       <main className="max-w-[1200px] mx-auto px-4 py-6 flex-1 w-full">
         <div className="flex gap-5">
           {/* Left Column - News */}
           <div className="flex-1 max-w-[820px]">
-            {/* News Header */}
+            {/* News Header - SSR 渲染 */}
             <div className="bg-white rounded-lg px-6 py-4 news-header border-b border-[#e8e8e8]">
               <div className="flex items-center justify-between">
                 <h1 className="text-[18px] font-normal text-[#333]">币世界快讯</h1>
@@ -73,63 +53,23 @@ export default function FlashPage() {
               </div>
             </div>
 
-            {/* 快訊列表 */}
+            {/* 快訊列表 - SSR 渲染內容 */}
             <div className="bg-white rounded-lg mt-[-1px]">
-              {loading && flashes.length === 0 ? (
-                <div className="py-8 text-center">
-                  <p className="text-[#666]">加載中...</p>
-                </div>
-              ) : (
-                <FlashListContainer flashes={flashes} />
-              )}
+              <FlashListContainer flashes={initialFlashes} />
             </div>
             
-            {/* 加載更多按鈕 - 獨立的白底容器 */}
-            {hasMore && flashes.length > 0 && (
-              <div className="bg-white rounded-lg mt-4">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loading}
-                  className="w-full py-4 flex items-center justify-center gap-2 text-[#5B7BFF] hover:text-[#8da1ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
-                >
-                  {/* 雙箭頭向下圖標 */}
-                  <svg 
-                    className="w-5 h-5 group-hover:text-[#8da1ff] transition-colors" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M19 13l-7 7-7-7m14-8l-7 7-7-7" 
-                    />
-                  </svg>
-                  <span className="text-[14px] font-normal group-hover:text-[#8da1ff] transition-colors">
-                    {loading ? '加載中...' : '加載更多'}
-                  </span>
-                </button>
-              </div>
-            )}
-            
-            {/* 已加載全部 */}
-            {!hasMore && flashes.length > 0 && (
-              <div className="bg-white rounded-lg mt-4 py-4 text-center">
-                <p className="text-[#999] text-sm">已加載全部快訊</p>
-              </div>
-            )}
+            {/* 加載更多按鈕 - 客戶端組件 */}
+            <LoadMoreButton 
+              initialHasMore={hasMore}
+            />
           </div>
 
-          {/* Right Sidebar */}
+          {/* Right Sidebar - 混合渲染 */}
           <div className="w-[340px] hidden lg:block">
             <MarketSidebar />
           </div>
         </div>
       </main>
-
-      <Footer />
-      <FloatingButtons />
-    </div>
+    </ClientLayout>
   );
 } 
