@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Flash } from '@/types/flash';
 import { ThumbsUp, ThumbsDown, Share2, ExternalLink } from 'lucide-react';
 
@@ -76,7 +77,10 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
         {/* 內容區域 */}
         <div className="flex-1 pl-3 pr-5 pb-4 pt-3">
           {/* 標題 */}
-          <Link href={`/flash/${flash.slug}`}>
+          <Link 
+            href={`/flash/${flash.slug}`}
+            prefetch={true}
+          >
             <h3 className={`text-[16px] font-medium mb-2 cursor-pointer transition-colors ${
               isImportant 
                 ? 'text-[#FF6C47] hover:text-[#ff8866]' 
@@ -116,13 +120,16 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
             <>
               <div className="mb-2">
                 <div 
-                  className="w-[300px] h-[160px] rounded overflow-hidden cursor-pointer hover:opacity-90 transition-opacity bg-[#f5f5f5]"
+                  className="w-[300px] h-[160px] rounded overflow-hidden cursor-pointer hover:opacity-90 transition-opacity bg-[#f5f5f5] relative"
                   onClick={() => setShowImageModal(true)}
                 >
-                  <img 
+                  <Image 
                     src={flash.featured_image.url} 
                     alt={flash.featured_image.alt || flash.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="300px"
+                    loading="lazy"
                   />
                 </div>
               </div>
@@ -134,10 +141,13 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
                   onClick={() => setShowImageModal(false)}
                 >
                   <div className="relative max-w-[90vw] max-h-[90vh]">
-                    <img 
+                    <Image 
                       src={flash.featured_image.url} 
                       alt={flash.featured_image.alt || flash.title}
+                      width={1200}
+                      height={800}
                       className="max-w-full max-h-[90vh] object-contain"
+                      priority
                     />
                     <button 
                       className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
@@ -156,11 +166,11 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
 
           {/* 操作欄 */}
           <div className="flex items-center gap-4 text-[12px]">
-            {/* 查看原文 */}
+            {/* 消息來源 */}
             {hasSourceLink && (
               <button className="flex items-center gap-1 text-[#999] hover:text-[#5B7BFF] transition-colors">
                 <ExternalLink className="w-3 h-3" />
-                <span>查看原文</span>
+                <span>消息來源</span>
               </button>
             )}
 

@@ -18,10 +18,14 @@ export interface Flash {
     alt: string;
     width: number;
     height: number;
+    caption?: string;
   };
   meta: {
     views?: number;
     reading_time?: number;
+    source_url?: string;
+    bullish_count?: number;
+    bearish_count?: number;
   };
   isImportant?: boolean;
 }

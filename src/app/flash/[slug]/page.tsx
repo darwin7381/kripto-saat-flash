@@ -1,17 +1,15 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Clock, User, ArrowLeft } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Share2, MessageCircle, ThumbsUp, ThumbsDown, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { FlashCard } from '@/components/flash/FlashCard';
+import { Separator } from '@/components/ui/separator';
 import { apiService } from '@/lib/api';
 import { config } from '@/lib/config';
-import { Flash, Category, Tag } from '@/types/flash';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { Flash, Category, Tag as TagType } from '@/types/flash';
+import ClientLayout from '@/components/layout/ClientLayout';
+import MarketSidebar from '@/components/market/MarketSidebar';
+import FlashImageViewer from '@/components/flash/FlashImageViewer';
 
 interface FlashDetailPageProps {
   params: Promise<{
@@ -77,10 +75,29 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
   const { data } = await response.json();
   const { flash, relatedFlashes } = data;
 
-  const timeAgo = formatDistanceToNow(new Date(flash.published_at), {
-    addSuffix: true,
-    locale: zhCN,
-  });
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  };
+
+  // 模擬市場標籤數據（實際應該從 API 獲取）
+  const getMarketTags = (id: number) => {
+    const tags = [
+      { name: "BTC", change: "+1.74%", type: "up" },
+      { name: "ETH", change: "-2.12%", type: "down" },
+      { name: "USDT", change: "+0.01%", type: "up" },
+    ];
+    return tags.slice(0, (id % 3) + 1);
+  };
+
+  const marketTags = getMarketTags(flash.id);
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -109,119 +126,222 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
   };
 
   return (
-    <>
+    <ClientLayout>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          
-          {/* 麵包屑導航 */}
-          <Breadcrumb className="mb-6">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">首頁</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/flash">快訊</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{flash.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+      <main className="max-w-[1200px] mx-auto px-4 py-6 flex-1 w-full">
+        <div className="flex gap-5">
+          {/* 主要內容區 */}
+          <div className="flex-1 max-w-[820px]">
+            <div className="bg-white rounded-lg p-6">
+              {/* 快訊標題 */}
+              <h1 className="text-[26px] font-bold text-[#1a1a1a] leading-[1.5] mb-4">
+                {flash.title}
+              </h1>
 
-          {/* 返回按鈕 */}
-          <Link 
-            href="/flash" 
-            className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回快訊列表
-          </Link>
-
-          {/* 快訊內容 */}
-          <Card className="mb-8">
-            <CardHeader className="space-y-4">
-              <h1 className="text-3xl font-bold leading-tight">{flash.title}</h1>
-              
-              {/* 元資訊 */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <User className="w-4 h-4" />
-                  <span>{flash.author.name}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{timeAgo}</span>
-                </div>
-                {flash.meta.reading_time && (
-                  <span>{flash.meta.reading_time} 分鐘閱讀</span>
-                )}
-                {flash.meta.views && (
-                  <span>{flash.meta.views.toLocaleString()} 次瀏覽</span>
-                )}
+              {/* 作者和時間資訊 */}
+              <div className="flex items-center gap-2 text-[14px] text-[#999] mb-6">
+                <span className="text-[#666]">{flash.author.name}</span>
+                <span>|</span>
+                <span>{formatDate(flash.published_at)}</span>
               </div>
 
-              {/* 分類標籤 */}
-              <div className="flex flex-wrap gap-2">
-                {flash.categories.map((category: Category) => (
-                  <Link key={category.id} href={`/flash/category/${category.slug}`}>
-                    <Badge variant="secondary" className="hover:bg-primary hover:text-primary-foreground transition-colors">
-                      {category.name}
-                    </Badge>
-                  </Link>
-                ))}
-                {flash.tags.map((tag: Tag) => (
-                  <Link key={tag.id} href={`/tag/${tag.slug}`}>
-                    <Badge variant="outline" className="hover:bg-muted transition-colors">
-                      {tag.name}
-                    </Badge>
-                  </Link>
-                ))}
+              {/* 快訊內容 */}
+              <div className="text-[16px] text-[#333] leading-[1.8] mb-6 whitespace-pre-wrap">
+                {flash.content}
               </div>
-            </CardHeader>
 
-            <CardContent className="space-y-6">
-              {/* 特色圖片 */}
+              {/* 附件圖片 - 使用客戶端組件 */}
               {flash.featured_image && (
-                <div className="relative aspect-video rounded-lg overflow-hidden">
-                  <Image
+                <div className="mb-6">
+                  <FlashImageViewer
                     src={flash.featured_image.url}
-                    alt={flash.featured_image.alt}
-                    fill
-                    className="object-cover"
-                    priority
+                    alt={flash.featured_image.alt || flash.title}
                   />
                 </div>
               )}
 
-              {/* 快訊內容 */}
-              <div className="prose prose-gray dark:prose-invert max-w-none">
-                <p className="text-lg leading-relaxed whitespace-pre-wrap">
-                  {flash.content}
-                </p>
+              {/* 消息來源 - 移到圖片後面、標籤前面 */}
+              <div className="mb-6">
+                <button className="inline-flex items-center gap-1 text-[14px] text-[#999] hover:text-[#5B7BFF] transition-colors">
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>消息來源</span>
+                </button>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* 相關快訊 */}
-          {relatedFlashes.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">相關快訊</h2>
-              <div className="grid gap-6">
-                {relatedFlashes.map((relatedFlash: Flash) => (
-                  <FlashCard key={relatedFlash.id} flash={relatedFlash} />
-                ))}
+              {/* 幣種標籤 */}
+              {marketTags.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex flex-wrap gap-2">
+                    {marketTags.map((tag, index) => (
+                      <Link 
+                        key={index}
+                        href="#"
+                        className={`inline-flex items-center px-[5px] rounded text-[12px] transition-all ${
+                          tag.type === 'up' 
+                            ? 'bg-[#F6FFFC] text-[#00C087] hover:bg-[#e6fff9]' 
+                            : 'bg-[#FFF2F2] text-[#FF4949] hover:bg-[#ffe6e6]'
+                        }`}
+                      >
+                        <span className="font-medium">{tag.name}</span>
+                        <span className="ml-1">{tag.change}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 普通標籤 */}
+              <div className="mb-6">
+                <div className="flex flex-wrap gap-2">
+                  {flash.categories.map((category: Category) => (
+                    <Link 
+                      key={category.id} 
+                      href={`/flash/category/${category.slug}`}
+                      className="inline-block"
+                    >
+                      <Badge 
+                        variant="secondary" 
+                        className="bg-[#f5f5f5] text-[#666] hover:bg-[#e8e8e8] hover:text-[#333] transition-colors px-3 py-1 text-sm font-normal"
+                      >
+                        {category.name}
+                      </Badge>
+                    </Link>
+                  ))}
+                  {flash.tags.map((tag: TagType) => (
+                    <Link 
+                      key={tag.id} 
+                      href={`/tag/${tag.slug}`}
+                      className="inline-block"
+                    >
+                      <Badge 
+                        variant="outline" 
+                        className="border-[#e8e8e8] text-[#666] hover:border-[#5B7BFF] hover:text-[#5B7BFF] transition-colors px-3 py-1 text-sm font-normal"
+                      >
+                        {tag.name}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* 操作按鈕組 */}
+              <div className="flex items-center gap-4 text-[14px] border-t border-[#f0f0f0] pt-4">
+                {/* 看多 */}
+                <button className="flex items-center gap-1 text-[#999] hover:text-[#26a69a] transition-colors group">
+                  <div className="flex items-center justify-center w-4 h-4">
+                    <ThumbsUp className="w-3.5 h-3.5 group-hover:fill-[#26a69a]" />
+                  </div>
+                  <span>看多 {flash.meta?.bullish_count || 0}</span>
+                </button>
+
+                {/* 看空 */}
+                <button className="flex items-center gap-1 text-[#999] hover:text-[#ef5350] transition-colors group">
+                  <div className="flex items-center justify-center w-4 h-4">
+                    <ThumbsDown className="w-3.5 h-3.5 group-hover:fill-[#ef5350]" />
+                  </div>
+                  <span>看空 {flash.meta?.bearish_count || 0}</span>
+                </button>
+
+                {/* 分享 */}
+                <button className="flex items-center gap-1 text-[#999] hover:text-[#5B7BFF] transition-colors ml-auto">
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>分享</span>
+                </button>
+              </div>
+
+              <Separator className="my-8" />
+
+              {/* 評論區域 */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" />
+                  評論
+                </h3>
+                <div className="bg-[#f8f8f8] rounded-lg p-8 text-center text-[#999]">
+                  <p>還沒有人評論～快搶沙發吧！</p>
+                </div>
+              </div>
+
+              {/* 關注提示 */}
+              <div className="bg-[#f8f8f8] rounded-lg p-6 text-center">
+                <p className="text-[#666] mb-4">關注 Kripto Saat 官方帳號，一起穿越牛熊</p>
+                <div className="flex justify-center gap-4">
+                  <Badge className="bg-[#5B7BFF] hover:bg-[#4a6aee] text-white px-4 py-2 cursor-pointer">
+                    <Link href="#">Kripto Saat 微信群</Link>
+                  </Badge>
+                  <Badge variant="outline" className="border-[#5B7BFF] text-[#5B7BFF] hover:bg-[#5B7BFF] hover:text-white px-4 py-2 cursor-pointer">
+                    <Link href="#">Telegram 交流群</Link>
+                  </Badge>
+                </div>
               </div>
             </div>
-          )}
+
+            {/* 相關快訊 */}
+            {relatedFlashes.length > 0 && (
+              <div className="bg-white rounded-lg mt-4">
+                <div className="px-6 py-4 border-b border-[#e8e8e8]">
+                  <h3 className="text-[16px] font-normal text-[#333]">相關快訊</h3>
+                </div>
+                <div className="px-6">
+                  {relatedFlashes.slice(0, 5).map((relatedFlash: Flash) => {
+                    const formatTime = (dateString: string) => {
+                      const date = new Date(dateString);
+                      return date.toLocaleTimeString('zh-CN', { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        hour12: false 
+                      });
+                    };
+
+                    return (
+                      <div key={relatedFlash.id} className="relative py-4">
+                        {/* 垂直線 */}
+                        <div className="absolute left-[10px] top-0 bottom-0 w-[1px] bg-[#e8e8e8]"></div>
+                        
+                        {/* 圓點 */}
+                        <div className="absolute left-[7px] top-[20px] w-[7px] h-[7px] bg-[#dcdcdc] rounded-full z-10"></div>
+                        
+                        {/* 內容 */}
+                        <div className="pl-[30px]">
+                          {/* 時間 - 第一行 */}
+                          <div className="text-[12px] text-[#999] mb-1">
+                            {formatTime(relatedFlash.published_at)}
+                          </div>
+                          
+                          {/* 標題 - 第二行，與時間對齊 */}
+                          <Link href={`/flash/${relatedFlash.slug}`}>
+                            <h4 className={`text-[16px] font-normal leading-[1.5] mb-2 transition-colors ${
+                              relatedFlash.isImportant 
+                                ? 'text-[#FF6C47] hover:text-[#ff8866]' 
+                                : 'text-[#333] hover:text-[#5B7BFF]'
+                            }`}>
+                              {relatedFlash.title}
+                            </h4>
+                          </Link>
+                          
+                          {/* 摘要 */}
+                          <p className="text-[14px] text-[#999] leading-[1.6]">
+                            {relatedFlash.excerpt || relatedFlash.content.slice(0, 100) + '...'}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Sidebar - 市場資訊 */}
+          <div className="w-[340px] hidden lg:block">
+            <MarketSidebar />
+          </div>
         </div>
-      </div>
-    </>
+      </main>
+    </ClientLayout>
   );
 } 

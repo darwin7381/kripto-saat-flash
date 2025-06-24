@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    domains: ['res.cloudinary.com', 'images.unsplash.com'],
   },
 };
 
