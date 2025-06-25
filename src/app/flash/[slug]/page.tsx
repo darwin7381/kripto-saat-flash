@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { Share2, MessageCircle, ThumbsUp, ThumbsDown, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { apiService } from '@/lib/api';
+
 import { config } from '@/lib/config';
 import { Flash, Category, Tag as TagType } from '@/types/flash';
+import { apiService } from '@/lib/api';
 import ClientLayout from '@/components/layout/ClientLayout';
 import MarketSidebar from '@/components/market/MarketSidebar';
 import FlashImageViewer from '@/components/flash/FlashImageViewer';
@@ -19,61 +20,73 @@ interface FlashDetailPageProps {
 
 export async function generateMetadata({ params }: FlashDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const flash = await apiService.getFlash(slug);
   
-  if (!flash) {
+  try {
+    // URL 解碼 slug（處理中文字符）
+    const decodedSlug = decodeURIComponent(slug);
+    
+    // 使用 API 服務獲取快訊
+    const flash = await apiService.getFlash(decodedSlug);
+    
+    if (!flash) {
+      return {
+        title: '快訊不存在',
+        description: '您要查看的快訊不存在或已被刪除',
+      };
+    }
+
     return {
-      title: '快訊不存在',
-      description: '您要查看的快訊不存在或已被刪除',
+      title: `${flash.title} | Kripto Saat Flash`,
+      description: flash.excerpt,
+      keywords: [...flash.categories.map((c: Category) => c.name), ...flash.tags.map((t: TagType) => t.name)],
+      openGraph: {
+        title: flash.title,
+        description: flash.excerpt,
+        url: `${config.site.url}/flash/${flash.slug}`,
+        siteName: config.site.name,
+        type: 'article',
+        publishedTime: flash.published_at,
+        modifiedTime: flash.updated_at,
+        authors: [flash.author.name],
+                  tags: flash.tags.map((t: TagType) => t.name),
+        images: flash.featured_image ? [{
+          url: flash.featured_image.url,
+          width: flash.featured_image.width,
+          height: flash.featured_image.height,
+          alt: flash.featured_image.alt,
+        }] : undefined,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: flash.title,
+        description: flash.excerpt,
+        images: flash.featured_image ? [flash.featured_image.url] : undefined,
+      },
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: '快訊載入失敗',
+      description: '無法載入快訊內容',
     };
   }
-
-  return {
-    title: `${flash.title} | Kripto Saat Flash`,
-    description: flash.excerpt,
-    keywords: [...flash.categories.map(c => c.name), ...flash.tags.map(t => t.name)],
-    openGraph: {
-      title: flash.title,
-      description: flash.excerpt,
-      url: `${config.site.url}/flash/${flash.slug}`,
-      siteName: config.site.name,
-      type: 'article',
-      publishedTime: flash.published_at,
-      modifiedTime: flash.updated_at,
-      authors: [flash.author.name],
-      tags: flash.tags.map(t => t.name),
-      images: flash.featured_image ? [{
-        url: flash.featured_image.url,
-        width: flash.featured_image.width,
-        height: flash.featured_image.height,
-        alt: flash.featured_image.alt,
-      }] : undefined,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: flash.title,
-      description: flash.excerpt,
-      images: flash.featured_image ? [flash.featured_image.url] : undefined,
-    },
-  };
 }
 
 export default async function FlashDetailPage({ params }: FlashDetailPageProps) {
   const { slug } = await params;
   
-  const response = await fetch(`${config.site.url}/api/flashes/${slug}`, {
-    next: { revalidate: 3600 }, // 1小時重新驗證
-  });
+  // URL 解碼 slug（處理中文字符）
+  const decodedSlug = decodeURIComponent(slug);
+  
+  // 使用 API 服務獲取快訊
+  const flash = await apiService.getFlash(decodedSlug);
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      notFound();
-    }
-    throw new Error('Failed to fetch flash');
+  if (!flash) {
+    notFound();
   }
 
-  const { data } = await response.json();
-  const { flash, relatedFlashes } = data;
+  // 獲取相關快訊
+  const relatedFlashes = await apiService.getRelatedFlashes(flash.id, 5);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

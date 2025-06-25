@@ -80,7 +80,6 @@ class ApiError extends Error {
 export class ApiService {
   private baseUrl: string;
   private headers: Record<string, string>;
-  private useMockData: boolean;
 
   constructor() {
     this.baseUrl = config.strapi.url;
@@ -90,7 +89,6 @@ export class ApiService {
         'Authorization': `Bearer ${config.strapi.apiToken}`,
       }),
     };
-    this.useMockData = MOCK_MODE.enabled;
   }
 
   /**
@@ -99,7 +97,7 @@ export class ApiService {
    */
   async getHotFlashes(page: number = 1, limit: number = config.api.itemsPerPage): Promise<FlashListResponse> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.getHotFlashes(page, limit);
     }
 
@@ -152,7 +150,7 @@ export class ApiService {
    */
   async getSegmentFlashes(segmentId: number): Promise<SegmentResponse> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.getSegmentFlashes(segmentId);
     }
 
@@ -198,7 +196,7 @@ export class ApiService {
    */
   async checkUpdates(lastId: number): Promise<UpdateCheckResponse> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.checkUpdates(lastId);
     }
 
@@ -224,7 +222,7 @@ export class ApiService {
    */
   async getFlash(slug: string): Promise<Flash | null> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.getFlash(slug);
     }
 
@@ -248,7 +246,7 @@ export class ApiService {
    */
   async getCategoryFlashes(categorySlug: string, page: number = 1): Promise<FlashListResponse> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.getCategoryFlashes(categorySlug, page);
     }
 
@@ -281,7 +279,7 @@ export class ApiService {
    */
   async getRelatedFlashes(flashId: number, limit: number = 5): Promise<Flash[]> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.getRelatedFlashes(flashId, limit);
     }
 
@@ -303,7 +301,7 @@ export class ApiService {
    */
   async getCategories(): Promise<Category[]> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.getCategories();
     }
 
@@ -331,7 +329,7 @@ export class ApiService {
    */
   async getCategory(slug: string): Promise<Category | null> {
     // Mock模式：使用假資料
-    if (this.useMockData) {
+    if (MOCK_MODE.enabled) {
       return mockApiService.getCategory(slug);
     }
 
@@ -455,20 +453,10 @@ export class ApiService {
   }
 
   /**
-   * 切換Mock模式（僅用於開發和測試）
-   */
-  setMockMode(enabled: boolean): void {
-    if (config.isDevelopment) {
-      this.useMockData = enabled;
-      console.log(`API Service switched to ${enabled ? 'Mock' : 'Real'} mode`);
-    }
-  }
-
-  /**
    * 獲取當前模式
    */
   getMockMode(): boolean {
-    return this.useMockData;
+    return MOCK_MODE.enabled;
   }
 }
 

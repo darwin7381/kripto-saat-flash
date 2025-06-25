@@ -23,11 +23,20 @@ export default async function FlashPage() {
   let hasMore = true;
   
   try {
+    console.log('SSR: Attempting to fetch flashes...');
+    console.log('SSR: apiService mock mode:', apiService.getMockMode());
+    
+    // 使用正確的 apiService（根據環境變數自動判斷 Mock/真實 API）
     const flashData = await apiService.getHotFlashes(1, config.api.itemsPerPage);
+    console.log('SSR: Fetched flashes:', flashData.flashes.length);
     initialFlashes = flashData.flashes;
     hasMore = flashData.pagination.hasNext;
   } catch (error) {
-    console.error('Error fetching initial flashes:', error);
+    console.error('SSR Error fetching initial flashes:', error);
+    console.error('SSR Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    // 發生錯誤時使用空數據，避免整個頁面崩潰
+    initialFlashes = [];
+    hasMore = false;
   }
 
   return (

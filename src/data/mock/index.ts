@@ -5,8 +5,7 @@ export { mockAuthors, type MockAuthor } from './authors';
 export { mockFlashes } from './flashes';
 export { MockApiService, mockApiService } from './api';
 
-// 快速切換Mock模式的配置
+// 統一的Mock模式配置 - 以生產端 MOCK_MODE_ENABLED 為準
 export const MOCK_MODE = {
-  enabled: process.env.NODE_ENV === 'development' || process.env.USE_MOCK_DATA === 'true',
-  // 可以通過環境變數 USE_MOCK_DATA=true 強制啟用Mock模式
+  enabled: process.env.MOCK_MODE_ENABLED === 'true',
 }; 

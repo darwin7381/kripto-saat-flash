@@ -1,11 +1,37 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Header() {
   const [currency, setCurrency] = useState('CNY');
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // 確保組件只在客戶端渲染
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // 點擊外部關閉下拉菜單
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.currency-dropdown')) {
+        setShowCurrencyDropdown(false);
+      }
+    };
+
+    if (showCurrencyDropdown) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showCurrencyDropdown, mounted]);
 
   return (
     <>
@@ -49,7 +75,7 @@ export default function Header() {
             {/* Right side */}
             <div className="flex items-center space-x-5">
               {/* Currency Selector */}
-              <div className="relative">
+              <div className="relative currency-dropdown">
                 <button 
                   onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
                   className="flex items-center space-x-2 text-sm hover:text-white/90 transition-colors"
@@ -60,7 +86,8 @@ export default function Header() {
                   </svg>
                 </button>
                 
-                {showCurrencyDropdown && (
+                {/* 只在客戶端 mounted 後才渲染下拉菜單 */}
+                {mounted && showCurrencyDropdown && (
                   <div className="absolute top-full right-0 mt-2 bg-white text-gray-800 rounded shadow-lg py-2 min-w-[120px] z-50">
                     <button 
                       onClick={() => { setCurrency('CNY'); setShowCurrencyDropdown(false); }}
