@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Forwarded-Proto",
+          "value": "https"
+        },
+        {
+          "key": "X-Forwarded-Host",
+          "value": "kriptosaat.com"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "app/api/**/*.js": {
+      "maxDuration": 10
+    }
+  }
+} 
