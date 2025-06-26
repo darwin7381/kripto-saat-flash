@@ -45,10 +45,10 @@ export async function generateMetadata({ params }: FlashDetailPageProps): Promis
         url: `${config.site.url}/flash/${flash.slug}`,
         siteName: config.site.name,
         type: 'article',
-        publishedTime: flash.published_at,
-        modifiedTime: flash.updated_at,
+        publishedTime: flash.published_datetime,
+        modifiedTime: flash.updatedAt,
         authors: [flash.author.name],
-                  tags: flash.tags.map((t: TagType) => t.name),
+        tags: flash.tags.map((t: TagType) => t.name),
         images: flash.featured_image ? [{
           url: flash.featured_image.url,
           width: flash.featured_image.width,
@@ -118,8 +118,8 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
     headline: flash.title,
     description: flash.excerpt,
     image: flash.featured_image?.url,
-    datePublished: flash.published_at,
-    dateModified: flash.updated_at,
+    datePublished: flash.published_datetime,
+    dateModified: flash.updatedAt,
     author: {
       '@type': 'Person',
       name: flash.author.name,
@@ -159,7 +159,7 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
               <div className="flex items-center gap-2 text-[14px] text-[#999] mb-6">
                 <span className="text-[#666]">{flash.author.name}</span>
                 <span>|</span>
-                <span>{formatDate(flash.published_at)}</span>
+                <span>{formatDate(flash.published_datetime)}</span>
               </div>
 
               {/* 快訊內容 */}
@@ -248,7 +248,7 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
                   <div className="flex items-center justify-center w-4 h-4">
                     <ThumbsUp className="w-3.5 h-3.5 group-hover:fill-[#26a69a]" />
                   </div>
-                  <span>看多 {flash.meta?.bullish_count || 0}</span>
+                  <span>看多 {flash.bullish_count || 0}</span>
                 </button>
 
                 {/* 看空 */}
@@ -256,7 +256,7 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
                   <div className="flex items-center justify-center w-4 h-4">
                     <ThumbsDown className="w-3.5 h-3.5 group-hover:fill-[#ef5350]" />
                   </div>
-                  <span>看空 {flash.meta?.bearish_count || 0}</span>
+                  <span>看空 {flash.bearish_count || 0}</span>
                 </button>
 
                 {/* 分享 */}
@@ -322,13 +322,13 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
                         <div className="pl-[30px]">
                           {/* 時間 - 第一行 */}
                           <div className="text-[12px] text-[#999] mb-1">
-                            {formatTime(relatedFlash.published_at)}
+                            {formatTime(relatedFlash.published_datetime)}
                           </div>
                           
                           {/* 標題 - 第二行，與時間對齊 */}
                           <Link href={`/flash/${relatedFlash.slug}`}>
                             <h4 className={`text-[16px] font-normal leading-[1.5] mb-2 transition-colors ${
-                              relatedFlash.isImportant 
+                              relatedFlash.is_important 
                                 ? 'text-[#FF6C47] hover:text-[#ff8866]' 
                                 : 'text-[#333] hover:text-[#5B7BFF]'
                             }`}>

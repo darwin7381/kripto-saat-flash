@@ -141,7 +141,7 @@ export class ApiService {
         limit: data.meta.pagination.pageSize,
         total: data.meta.pagination.total,
         totalPages: data.meta.pagination.pageCount,
-        hasNext: data.meta.pagination.page < Math.min(data.meta.pagination.pageCount, config.api.hotPagesLimit),
+        hasNext: data.meta.pagination.page < data.meta.pagination.pageCount,
         hasPrev: data.meta.pagination.page > 1,
       },
     };
@@ -175,14 +175,14 @@ export class ApiService {
       'filters[id][$gte]': startId.toString(),
       'filters[id][$lte]': endId.toString(),
       'sort': 'id:desc',
-      'populate': 'author,categories,tags,featured_image',
+      'populate': '*',
       'pagination[pageSize]': '100', // 確保獲取全部
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { attributes: StrapiFlashAttributes }>>>(`/api/flashes?${params}`);
+    const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     
     // 獲取總快訊數以計算區段信息
-    const totalData = await this.request<StrapiResponse<StrapiItem[]>>('/api/flashes?pagination[pageSize]=1');
+    const totalData = await this.request<StrapiResponse<StrapiFlash[]>>('/api/flashes?pagination[pageSize]=1');
     const totalFlashes = totalData.meta.pagination.total;
     const latestHotPages = config.api.hotPagesLimit * config.api.itemsPerPage;
     const totalSegments = Math.ceil((totalFlashes - latestHotPages) / config.api.segmentSize);
@@ -213,7 +213,7 @@ export class ApiService {
       'sort': 'id:desc',
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { attributes: StrapiFlashAttributes }>>>(`/api/flashes?${params}`);
+    const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     const latestFlash = data.data[0];
 
     return {
@@ -229,10 +229,10 @@ export class ApiService {
   async getFlash(slug: string): Promise<Flash | null> {
     const params = new URLSearchParams({
       'filters[slug][$eq]': slug,
-      'populate': 'author,categories,tags,featured_image',
+      'populate': '*',
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { attributes: StrapiFlashAttributes }>>>(`/api/flashes?${params}`);
+    const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     
     if (data.data.length === 0) {
       return null;
@@ -250,10 +250,10 @@ export class ApiService {
       'pagination[page]': page.toString(),
       'pagination[pageSize]': config.api.itemsPerPage.toString(),
       'sort': 'id:desc',
-      'populate': 'author,categories,tags,featured_image',
+      'populate': '*',
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { attributes: StrapiFlashAttributes }>>>(`/api/flashes?${params}`);
+    const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     
     return {
       flashes: data.data.map(item => this.transformFlash(item)),
@@ -277,10 +277,10 @@ export class ApiService {
       'filters[id][$ne]': flashId.toString(),
       'pagination[pageSize]': limit.toString(),
       'sort': 'id:desc',
-      'populate': 'author,categories,tags,featured_image',
+      'populate': '*',
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { attributes: StrapiFlashAttributes }>>>(`/api/flashes?${params}`);
+    const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     return data.data.map(item => this.transformFlash(item));
   }
 
@@ -289,32 +289,28 @@ export class ApiService {
    */
   async getCategories(): Promise<Category[]> {
     const params = new URLSearchParams({
-      'populate': 'parent_category',
+      'populate': '*',
       'sort': 'display_order:asc',
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { 
-      attributes: {
+    const data = await this.request<StrapiResponse<Array<{
+      id: number;
+      documentId: string;
+      name: string;
+      slug: string;
+      description?: string;
+      wp_category_id?: number;
+      wp_sync_status?: 'pending' | 'synced' | 'failed';
+      display_order?: number;
+      is_active?: boolean;
+      parent_category?: {
+        id: number;
         name: string;
         slug: string;
-        description?: string;
-        wp_category_id?: number;
-        wp_sync_status?: 'pending' | 'synced' | 'failed';
-        display_order?: number;
-        is_active?: boolean;
-        parent_category?: {
-          data?: {
-            id: number;
-            attributes: {
-              name: string;
-              slug: string;
-            };
-          };
-        };
-      }
+      };
     }>>>(`/api/categories?${params}`);
     
-    return data.data.map((item) => this.transformCategory(item));
+    return data.data.map((item) => this.transformCategoryV5(item));
   }
 
   /**
@@ -323,35 +319,31 @@ export class ApiService {
   async getCategory(slug: string): Promise<Category | null> {
     const params = new URLSearchParams({
       'filters[slug][$eq]': slug,
-      'populate': 'parent_category',
+      'populate': '*',
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { 
-      attributes: {
+    const data = await this.request<StrapiResponse<Array<{
+      id: number;
+      documentId: string;
+      name: string;
+      slug: string;
+      description?: string;
+      wp_category_id?: number;
+      wp_sync_status?: 'pending' | 'synced' | 'failed';
+      display_order?: number;
+      is_active?: boolean;
+      parent_category?: {
+        id: number;
         name: string;
         slug: string;
-        description?: string;
-        wp_category_id?: number;
-        wp_sync_status?: 'pending' | 'synced' | 'failed';
-        display_order?: number;
-        is_active?: boolean;
-        parent_category?: {
-          data?: {
-            id: number;
-            attributes: {
-              name: string;
-              slug: string;
-            };
-          };
-        };
-      }
+      };
     }>>>(`/api/categories?${params}`);
     
     if (data.data.length === 0) {
       return null;
     }
 
-    return this.transformCategory(data.data[0]);
+    return this.transformCategoryV5(data.data[0]);
   }
 
   /**
@@ -406,11 +398,13 @@ export class ApiService {
       bullish_count: data.bullish_count || 0,
       bearish_count: data.bearish_count || 0,
       author: this.transformAuthor(data.author),
-      categories: data.categories?.map((cat) => this.transformCategory(cat)) || [],
+      categories: data.categories?.map((cat) => this.transformCategoryV5(cat)) || [],
       tags: data.tags?.map((tag) => this.transformTag(tag)) || [],
       featured_image: data.featured_image ? {
         id: data.featured_image.id,
-        url: data.featured_image.url,
+        url: data.featured_image.url.startsWith('http') 
+          ? data.featured_image.url 
+          : `${this.baseUrl}${data.featured_image.url}`,
         alt: data.featured_image.alternativeText || '',
         width: data.featured_image.width || 0,
         height: data.featured_image.height || 0,
@@ -457,9 +451,24 @@ export class ApiService {
   }
 
   /**
-   * 轉換 STRAPI V5 Category 數據
+   * 轉換 STRAPI V5 Category 數據（新方法）
    */
-  private transformCategory(categoryData: NonNullable<StrapiFlash['categories']>[0]): Category {
+  private transformCategoryV5(categoryData: {
+    id: number;
+    documentId: string;
+    name: string;
+    slug: string;
+    description?: string;
+    wp_category_id?: number;
+    wp_sync_status?: 'pending' | 'synced' | 'failed';
+    display_order?: number;
+    is_active?: boolean;
+    parent_category?: {
+      id: number;
+      name: string;
+      slug: string;
+    };
+  }): Category {
     return {
       id: categoryData.id,
       name: categoryData.name,

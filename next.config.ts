@@ -57,6 +57,13 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // 開發環境的 STRAPI 圖片支援
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '1337',
+        pathname: '/uploads/**',
+      },
       // 為未來的圖片CDN預留配置
       {
         protocol: 'https',
