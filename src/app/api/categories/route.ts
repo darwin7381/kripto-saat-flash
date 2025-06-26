@@ -10,7 +10,6 @@ export async function GET() {
       success: true,
       data: categories,
       meta: {
-        mode: apiService.getMockMode() ? 'mock' : 'live',
         timestamp: new Date().toISOString(),
         count: categories.length,
       },
@@ -33,7 +32,6 @@ export async function GET() {
         success: false, 
         error: error instanceof Error ? error.message : 'Internal server error',
         meta: {
-          mode: apiService.getMockMode() ? 'mock' : 'live',
           timestamp: new Date().toISOString(),
         },
       },

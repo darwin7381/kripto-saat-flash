@@ -13,10 +13,14 @@ interface FlashCardProps {
 }
 
 export function FlashCard({ flash, priority = false }: FlashCardProps) {
-  const timeAgo = formatDistanceToNow(new Date(flash.published_at), {
+  // 直接使用 STRAPI 的 published_datetime 欄位
+  const timeAgo = formatDistanceToNow(new Date(flash.published_datetime), {
     addSuffix: true,
     locale: zhCN, // 使用中文語言包
   });
+
+  // 直接使用 STRAPI 的 view_count 欄位
+  const viewCount = flash.view_count || 0;
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 border-border/50 hover:border-primary/20">
@@ -48,9 +52,9 @@ export function FlashCard({ flash, priority = false }: FlashCardProps) {
                 <span>{timeAgo}</span>
               </div>
             </div>
-            {flash.meta.views && (
+            {viewCount > 0 && (
               <span className="text-xs">
-                {flash.meta.views.toLocaleString()} 次瀏覽
+                {viewCount.toLocaleString()} 次瀏覽
               </span>
             )}
           </div>
@@ -62,7 +66,7 @@ export function FlashCard({ flash, priority = false }: FlashCardProps) {
             <div className="relative aspect-video rounded-md overflow-hidden">
               <Image
                 src={flash.featured_image.url}
-                alt={flash.featured_image.alt}
+                alt={flash.featured_image.alt || flash.title}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 priority={priority}
@@ -93,7 +97,7 @@ export function FlashCard({ flash, priority = false }: FlashCardProps) {
           )}
 
           {/* 閱讀時間 */}
-          {flash.meta.reading_time && (
+          {flash.meta?.reading_time && (
             <div className="text-xs text-muted-foreground">
               預計閱讀時間：{flash.meta.reading_time} 分鐘
             </div>

@@ -30,7 +30,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           success: false, 
           error: 'Flash not found',
           meta: {
-            mode: apiService.getMockMode() ? 'mock' : 'live',
             timestamp: new Date().toISOString(),
             slug,
           },
@@ -50,7 +49,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         relatedFlashes,
       },
       meta: {
-        mode: apiService.getMockMode() ? 'mock' : 'live',
         timestamp: new Date().toISOString(),
         slug,
         relatedCount: relatedFlashes.length,
@@ -75,7 +73,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         success: false, 
         error: error instanceof Error ? error.message : 'Internal server error',
         meta: {
-          mode: apiService.getMockMode() ? 'mock' : 'live',
           timestamp: new Date().toISOString(),
         },
       },

@@ -24,9 +24,8 @@ export default async function FlashPage() {
   
   try {
     console.log('SSR: Attempting to fetch flashes...');
-    console.log('SSR: apiService mock mode:', apiService.getMockMode());
     
-    // 使用正確的 apiService（根據環境變數自動判斷 Mock/真實 API）
+    // 使用 STRAPI API 獲取數據
     const flashData = await apiService.getHotFlashes(1, config.api.itemsPerPage);
     console.log('SSR: Fetched flashes:', flashData.flashes.length);
     initialFlashes = flashData.flashes;

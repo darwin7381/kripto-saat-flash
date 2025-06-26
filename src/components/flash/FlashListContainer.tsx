@@ -38,7 +38,8 @@ const groupFlashesByDate = (flashes: Flash[]) => {
   const groups: { [key: string]: { date: Date; flashes: Flash[] } } = {};
   
   flashes.forEach(flash => {
-    const date = new Date(flash.published_at);
+    // 直接使用 STRAPI 的 published_datetime 欄位
+    const date = new Date(flash.published_datetime);
     const dateKey = date.toDateString();
     
     if (!groups[dateKey]) {
@@ -81,7 +82,7 @@ export default function FlashListContainer({ flashes }: FlashListContainerProps)
               <FlashNewsCard 
                 key={flash.id} 
                 flash={flash} 
-                isImportant={flash.isImportant}
+                isImportant={flash.is_important || false}
               />
             ))}
           </div>

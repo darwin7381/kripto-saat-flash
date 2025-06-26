@@ -62,7 +62,7 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
           {/* 時間和圓點在同一行 */}
           <div className="flex items-start pt-3">
             <span className="text-[#333] text-[12px] font-normal leading-[24px] pr-3 text-right w-[70px]" style={{ fontFamily: '"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
-              {formatTime(flash.published_at)}
+              {formatTime(flash.published_datetime)}
             </span>
             {/* 圓點容器 */}
             <div className="relative w-[30px] flex justify-center">

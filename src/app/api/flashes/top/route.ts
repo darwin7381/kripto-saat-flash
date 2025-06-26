@@ -36,7 +36,6 @@ export async function GET(request: NextRequest) {
       success: true,
       data: result,
       meta: {
-        mode: apiService.getMockMode() ? 'mock' : 'live',
         timestamp: new Date().toISOString(),
       },
     });
@@ -58,7 +57,6 @@ export async function GET(request: NextRequest) {
         success: false, 
         error: error instanceof Error ? error.message : 'Internal server error',
         meta: {
-          mode: apiService.getMockMode() ? 'mock' : 'live',
           timestamp: new Date().toISOString(),
         },
       },

@@ -1,6 +1,5 @@
 import { config } from './config';
-import { Flash, FlashListResponse, SegmentResponse, UpdateCheckResponse, Category } from '@/types/flash';
-import { MOCK_MODE, mockApiService } from '@/data/mock';
+import { Flash, FlashListResponse, SegmentResponse, UpdateCheckResponse, Category, Author, Tag } from '@/types/flash';
 
 // StrAPI 回應類型定義
 interface StrapiResponse<T> {
@@ -20,53 +19,78 @@ interface StrapiItem {
   attributes: Record<string, unknown>;
 }
 
-interface StrapiFlashAttributes {
+// STRAPI V5 Flash 直接格式（無 attributes 包裝）
+interface StrapiFlash {
+  id: number;
+  documentId: string;
   title: string;
   content: string;
   excerpt?: string;
   slug: string;
-  published_at: string;
-  updated_at: string;
-  views?: number;
-  reading_time?: number;
+  published_datetime: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  is_important?: boolean;
+  is_featured?: boolean;
+  view_count?: number;
+  source_url?: string;
+  bullish_count?: number;
+  bearish_count?: number;
   author?: {
-    data?: {
+    id: number;
+    documentId: string;
+    name: string;
+    email?: string;
+    bio?: string;
+    wp_user_id?: number;
+    wp_sync_status?: 'pending' | 'synced' | 'failed';
+    social_links?: Record<string, string>;
+    avatar?: {
       id: number;
-      attributes: {
-        name: string;
-        email: string;
-      };
+      url: string;
+      alternativeText?: string;
+      width?: number;
+      height?: number;
+      formats?: Record<string, unknown>;
     };
   };
-  categories?: {
-    data?: Array<{
+  categories?: Array<{
+    id: number;
+    documentId: string;
+    name: string;
+    slug: string;
+    description?: string;
+    wp_category_id?: number;
+    wp_sync_status?: 'pending' | 'synced' | 'failed';
+    display_order?: number;
+    is_active?: boolean;
+    parent_category?: {
       id: number;
-      attributes: {
-        name: string;
-        slug: string;
-        wp_category_id?: number;
-      };
-    }>;
-  };
-  tags?: {
-    data?: Array<{
-      id: number;
-      attributes: {
-        name: string;
-        slug: string;
-        wp_tag_id?: number;
-      };
-    }>;
-  };
+      name: string;
+      slug: string;
+    };
+  }>;
+  tags?: Array<{
+    id: number;
+    documentId: string;
+    name: string;
+    slug: string;
+    description?: string;
+    wp_tag_id?: number;
+    wp_sync_status?: 'pending' | 'synced' | 'failed';
+    usage_count?: number;
+    elasticsearch_synced?: boolean;
+    color?: string;
+    is_active?: boolean;
+  }>;
   featured_image?: {
-    data?: {
-      attributes: {
-        url: string;
-        alternativeText?: string;
-        width?: number;
-        height?: number;
-      };
-    };
+    id: number;
+    url: string;
+    alternativeText?: string;
+    width?: number;
+    height?: number;
+    formats?: Record<string, unknown>;
   };
 }
 
@@ -96,12 +120,6 @@ export class ApiService {
    * 獲取最新的快訊，支援分頁
    */
   async getHotFlashes(page: number = 1, limit: number = config.api.itemsPerPage): Promise<FlashListResponse> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.getHotFlashes(page, limit);
-    }
-
-    // 真實模式：調用StrAPI
     // 限制只能獲取前10頁
     if (page > config.api.hotPagesLimit) {
       throw new ApiError(`Page ${page} exceeds hot pages limit (${config.api.hotPagesLimit})`);
@@ -111,10 +129,10 @@ export class ApiService {
       'pagination[page]': page.toString(),
       'pagination[pageSize]': limit.toString(),
       'sort': 'id:desc',
-      'populate': 'author,categories,tags,featured_image',
+      'populate': '*',
     });
 
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { attributes: StrapiFlashAttributes }>>>(`/api/flashes?${params}`);
+    const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     
     const response: FlashListResponse = {
       flashes: data.data.map(item => this.transformFlash(item)),
@@ -149,12 +167,6 @@ export class ApiService {
    * 獲取指定區段的快訊
    */
   async getSegmentFlashes(segmentId: number): Promise<SegmentResponse> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.getSegmentFlashes(segmentId);
-    }
-
-    // 真實模式：調用StrAPI
     // 計算區段的ID範圍
     const startId = (segmentId - 1) * config.api.segmentSize + 1;
     const endId = segmentId * config.api.segmentSize;
@@ -195,12 +207,6 @@ export class ApiService {
    * 檢查是否有新的快訊發布
    */
   async checkUpdates(lastId: number): Promise<UpdateCheckResponse> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.checkUpdates(lastId);
-    }
-
-    // 真實模式：調用StrAPI
     const params = new URLSearchParams({
       'filters[id][$gt]': lastId.toString(),
       'pagination[pageSize]': '1',
@@ -221,12 +227,6 @@ export class ApiService {
    * 獲取單篇快訊詳情
    */
   async getFlash(slug: string): Promise<Flash | null> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.getFlash(slug);
-    }
-
-    // 真實模式：調用StrAPI
     const params = new URLSearchParams({
       'filters[slug][$eq]': slug,
       'populate': 'author,categories,tags,featured_image',
@@ -245,17 +245,11 @@ export class ApiService {
    * 獲取分類快訊
    */
   async getCategoryFlashes(categorySlug: string, page: number = 1): Promise<FlashListResponse> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.getCategoryFlashes(categorySlug, page);
-    }
-
-    // 真實模式：調用StrAPI
     const params = new URLSearchParams({
       'filters[categories][slug][$eq]': categorySlug,
       'pagination[page]': page.toString(),
       'pagination[pageSize]': config.api.itemsPerPage.toString(),
-      'sort': 'published_at:desc',
+      'sort': 'id:desc',
       'populate': 'author,categories,tags,featured_image',
     });
 
@@ -278,17 +272,11 @@ export class ApiService {
    * 獲取相關快訊
    */
   async getRelatedFlashes(flashId: number, limit: number = 5): Promise<Flash[]> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.getRelatedFlashes(flashId, limit);
-    }
-
-    // 真實模式：調用StrAPI
-    // 這裡可以基於分類、標籤或其他邏輯來獲取相關快訊
+    // 基於分類、標籤獲取相關快訊
     const params = new URLSearchParams({
       'filters[id][$ne]': flashId.toString(),
       'pagination[pageSize]': limit.toString(),
-      'sort': 'published_at:desc',
+      'sort': 'id:desc',
       'populate': 'author,categories,tags,featured_image',
     });
 
@@ -300,42 +288,9 @@ export class ApiService {
    * 獲取所有分類
    */
   async getCategories(): Promise<Category[]> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.getCategories();
-    }
-
-    // 真實模式：調用StrAPI
-    const data = await this.request<StrapiResponse<Array<StrapiItem & { 
-      attributes: {
-        name: string;
-        slug: string;
-        description?: string;
-        wp_category_id?: number;
-      }
-    }>>>('/api/categories');
-    
-    return data.data.map((item) => ({
-      id: item.id,
-      name: item.attributes.name,
-      slug: item.attributes.slug,
-      description: item.attributes.description,
-      wp_category_id: item.attributes.wp_category_id,
-    }));
-  }
-
-  /**
-   * 獲取單個分類
-   */
-  async getCategory(slug: string): Promise<Category | null> {
-    // Mock模式：使用假資料
-    if (MOCK_MODE.enabled) {
-      return mockApiService.getCategory(slug);
-    }
-
-    // 真實模式：調用StrAPI
     const params = new URLSearchParams({
-      'filters[slug][$eq]': slug,
+      'populate': 'parent_category',
+      'sort': 'display_order:asc',
     });
 
     const data = await this.request<StrapiResponse<Array<StrapiItem & { 
@@ -344,6 +299,51 @@ export class ApiService {
         slug: string;
         description?: string;
         wp_category_id?: number;
+        wp_sync_status?: 'pending' | 'synced' | 'failed';
+        display_order?: number;
+        is_active?: boolean;
+        parent_category?: {
+          data?: {
+            id: number;
+            attributes: {
+              name: string;
+              slug: string;
+            };
+          };
+        };
+      }
+    }>>>(`/api/categories?${params}`);
+    
+    return data.data.map((item) => this.transformCategory(item));
+  }
+
+  /**
+   * 獲取單個分類
+   */
+  async getCategory(slug: string): Promise<Category | null> {
+    const params = new URLSearchParams({
+      'filters[slug][$eq]': slug,
+      'populate': 'parent_category',
+    });
+
+    const data = await this.request<StrapiResponse<Array<StrapiItem & { 
+      attributes: {
+        name: string;
+        slug: string;
+        description?: string;
+        wp_category_id?: number;
+        wp_sync_status?: 'pending' | 'synced' | 'failed';
+        display_order?: number;
+        is_active?: boolean;
+        parent_category?: {
+          data?: {
+            id: number;
+            attributes: {
+              name: string;
+              slug: string;
+            };
+          };
+        };
       }
     }>>>(`/api/categories?${params}`);
     
@@ -351,18 +351,11 @@ export class ApiService {
       return null;
     }
 
-    const item = data.data[0];
-    return {
-      id: item.id,
-      name: item.attributes.name,
-      slug: item.attributes.slug,
-      description: item.attributes.description,
-      wp_category_id: item.attributes.wp_category_id,
-    };
+    return this.transformCategory(data.data[0]);
   }
 
   /**
-   * 私有方法：發送HTTP請求（僅在真實模式使用）
+   * 私有方法：發送HTTP請求
    */
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
@@ -378,7 +371,7 @@ export class ApiService {
 
       if (!response.ok) {
         throw new ApiError(
-          `API request failed: ${response.status} ${response.statusText}`,
+          `STRAPI API request failed: ${response.status} ${response.statusText}`,
           response.status
         );
       }
@@ -388,56 +381,122 @@ export class ApiService {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new ApiError(`STRAPI connection error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
-   * 轉換StrAPI數據格式為內部格式（僅在真實模式使用）
+   * 轉換StrAPI V5數據格式為內部格式
    */
-  private transformFlash(data: StrapiItem & { attributes: StrapiFlashAttributes }): Flash {
-    const attributes = data.attributes;
-    
+  private transformFlash(data: StrapiFlash): Flash {
     return {
       id: data.id,
-      title: attributes.title,
-      content: attributes.content,
-      excerpt: attributes.excerpt || '',
-      slug: attributes.slug,
-      published_at: attributes.published_at,
-      updated_at: attributes.updated_at,
-      author: {
-        id: attributes.author?.data?.id || 0,
-        name: attributes.author?.data?.attributes?.name || 'Anonymous',
-        email: attributes.author?.data?.attributes?.email || '',
-      },
-      categories: attributes.categories?.data?.map((cat) => ({
-        id: cat.id,
-        name: cat.attributes.name,
-        slug: cat.attributes.slug,
-        wp_category_id: cat.attributes.wp_category_id,
-      })) || [],
-      tags: attributes.tags?.data?.map((tag) => ({
-        id: tag.id,
-        name: tag.attributes.name,
-        slug: tag.attributes.slug,
-        wp_tag_id: tag.attributes.wp_tag_id,
-      })) || [],
-      featured_image: attributes.featured_image?.data ? {
-        url: attributes.featured_image.data.attributes.url,
-        alt: attributes.featured_image.data.attributes.alternativeText || '',
-        width: attributes.featured_image.data.attributes.width || 0,
-        height: attributes.featured_image.data.attributes.height || 0,
+      title: data.title,
+      content: data.content,
+      excerpt: data.excerpt || '',
+      slug: data.slug,
+      published_datetime: data.published_datetime,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      publishedAt: data.publishedAt,
+      is_important: data.is_important || false,
+      is_featured: data.is_featured || false,
+      view_count: data.view_count || 0,
+      source_url: data.source_url,
+      bullish_count: data.bullish_count || 0,
+      bearish_count: data.bearish_count || 0,
+      author: this.transformAuthor(data.author),
+      categories: data.categories?.map((cat) => this.transformCategory(cat)) || [],
+      tags: data.tags?.map((tag) => this.transformTag(tag)) || [],
+      featured_image: data.featured_image ? {
+        id: data.featured_image.id,
+        url: data.featured_image.url,
+        alt: data.featured_image.alternativeText || '',
+        width: data.featured_image.width || 0,
+        height: data.featured_image.height || 0,
+        formats: data.featured_image.formats,
       } : undefined,
       meta: {
-        views: attributes.views || 0,
-        reading_time: attributes.reading_time || 0,
+        views: data.view_count || 0,
+        reading_time: Math.ceil(data.content.length / 200),
+        source_url: data.source_url,
+        bullish_count: data.bullish_count || 0,
+        bearish_count: data.bearish_count || 0,
       },
     };
   }
 
   /**
-   * 找出區段中被刪除的ID（僅在真實模式使用）
+   * 轉換 STRAPI V5 Author 數據
+   */
+  private transformAuthor(authorData?: StrapiFlash['author']): Author {
+    if (!authorData) {
+      return {
+        id: 0,
+        name: 'Anonymous',
+      };
+    }
+
+    return {
+      id: authorData.id,
+      name: authorData.name || 'Anonymous',
+      email: authorData.email,
+      bio: authorData.bio,
+      wp_user_id: authorData.wp_user_id,
+      wp_sync_status: authorData.wp_sync_status || 'pending',
+      social_links: authorData.social_links,
+      avatar: authorData.avatar ? {
+        id: authorData.avatar.id,
+        url: authorData.avatar.url,
+        alt: authorData.avatar.alternativeText || '',
+        width: authorData.avatar.width,
+        height: authorData.avatar.height,
+        formats: authorData.avatar.formats,
+      } : undefined,
+    };
+  }
+
+  /**
+   * 轉換 STRAPI V5 Category 數據
+   */
+  private transformCategory(categoryData: NonNullable<StrapiFlash['categories']>[0]): Category {
+    return {
+      id: categoryData.id,
+      name: categoryData.name,
+      slug: categoryData.slug,
+      description: categoryData.description,
+      wp_category_id: categoryData.wp_category_id,
+      wp_sync_status: categoryData.wp_sync_status || 'pending',
+      display_order: categoryData.display_order || 0,
+      is_active: categoryData.is_active !== false,
+      parent_category: categoryData.parent_category ? {
+        id: categoryData.parent_category.id,
+        name: categoryData.parent_category.name,
+        slug: categoryData.parent_category.slug,
+      } : undefined,
+    };
+  }
+
+  /**
+   * 轉換 STRAPI V5 Tag 數據
+   */
+  private transformTag(tagData: NonNullable<StrapiFlash['tags']>[0]): Tag {
+    return {
+      id: tagData.id,
+      name: tagData.name,
+      slug: tagData.slug,
+      description: tagData.description,
+      wp_tag_id: tagData.wp_tag_id,
+      wp_sync_status: tagData.wp_sync_status || 'pending',
+      usage_count: tagData.usage_count || 0,
+      elasticsearch_synced: tagData.elasticsearch_synced || false,
+      color: tagData.color,
+      is_active: tagData.is_active !== false,
+    };
+  }
+
+  /**
+   * 找出區段中被刪除的ID
    */
   private findDeletedIds(startId: number, endId: number, flashes: Flash[]): number[] {
     const existingIds = new Set(flashes.map(f => f.id));
@@ -450,13 +509,6 @@ export class ApiService {
     }
     
     return deletedIds;
-  }
-
-  /**
-   * 獲取當前模式
-   */
-  getMockMode(): boolean {
-    return MOCK_MODE.enabled;
   }
 }
 

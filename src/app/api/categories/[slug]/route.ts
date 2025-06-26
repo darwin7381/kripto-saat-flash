@@ -30,7 +30,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       success: true,
       data: flashListResponse,
       meta: {
-        mode: apiService.getMockMode() ? 'mock' : 'live',
+        mode: 'live',
         timestamp: new Date().toISOString(),
         categorySlug: slug,
         page,
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         success: false, 
         error: error instanceof Error ? error.message : 'Internal server error',
         meta: {
-          mode: apiService.getMockMode() ? 'mock' : 'live',
+          mode: 'live',
           timestamp: new Date().toISOString(),
         },
       },
