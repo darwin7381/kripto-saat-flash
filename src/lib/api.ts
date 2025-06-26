@@ -14,10 +14,6 @@ interface StrapiResponse<T> {
   };
 }
 
-interface StrapiItem {
-  id: number;
-  attributes: Record<string, unknown>;
-}
 
 // STRAPI V5 Flash 直接格式（無 attributes 包裝）
 interface StrapiFlash {

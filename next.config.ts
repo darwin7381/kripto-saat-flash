@@ -90,7 +90,6 @@ const nextConfig: NextConfig = {
   // 確保正確的環境變數傳遞
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
-    MOCK_MODE_ENABLED: process.env.MOCK_MODE_ENABLED,
   },
 };
 
