@@ -52,7 +52,6 @@ USER nextjs
 
 # 暴露端口
 EXPOSE 3000
-ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # 啟動應用

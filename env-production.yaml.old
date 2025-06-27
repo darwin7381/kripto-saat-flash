@@ -1,0 +1,54 @@
+# Production environment variables for Cloud Run deployment
+# Note: Sensitive data like tokens are stored in Google Secret Manager
+#
+# 🏗️ 架構說明：
+# - Flash 網站：flash.kriptosaat.com (Domain Mapping -> kripto-saat-flash)
+# - Strapi CMS：需要正確的 Strapi 域名
+# - 主網站：kriptosaat.com (WordPress)
+
+# ========================================
+# 基本環境配置
+# ========================================
+NODE_ENV: "production"
+NEXT_TELEMETRY_DISABLED: "1"
+
+# ========================================
+# 網站配置 (基於 Domain Mappings)
+# ========================================
+NEXT_PUBLIC_SITE_URL: "https://flash.kriptosaat.com"
+SITE_URL: "https://flash.kriptosaat.com"
+SITE_NAME: "Kripto Saat Flash"
+
+# ========================================
+# API 配置 (Strapi 後端)
+# ========================================
+# 🔄 TODO: 設置 Strapi 的正確域名映射 (例如 strapi.kriptosaat.com)
+# 目前使用臨時的 Cloud Run URL，需要設置 Domain Mapping
+API_BASE_URL: "https://kripto-saat-strapi-651765797330.europe-west1.run.app"
+NEXT_PUBLIC_API_BASE_URL: "https://kripto-saat-strapi-651765797330.europe-west1.run.app"
+
+# ========================================
+# WordPress 整合 (主平台)
+# ========================================
+WORDPRESS_URL: "https://kriptosaat.com"
+WORDPRESS_API_URL: "https://kriptosaat.com/wp-json/wp/v2"
+
+# ========================================
+# 應用程式配置
+# ========================================
+ITEMS_PER_PAGE: "25"
+HOT_PAGES_LIMIT: "10"
+SEGMENT_SIZE: "25"
+UPDATE_CHECK_INTERVAL: "60000"
+
+# ========================================
+# SEO 配置
+# ========================================
+TWITTER_HANDLE: "@kriptosaat"
+
+# ========================================
+# 敏感資訊 (來自 Secret Manager)
+# ========================================
+# 以下敏感資訊通過 Secret Manager 注入：
+# - STRAPI_ADMIN_TOKEN (from secret: strapi-admin-token)
+# - STRAPI_API_TOKEN (from secret: strapi-api-token)

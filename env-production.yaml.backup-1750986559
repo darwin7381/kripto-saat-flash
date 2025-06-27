@@ -1,0 +1,24 @@
+# Production environment variables for Cloud Run deployment
+# Note: Sensitive data like tokens are stored in Google Secret Manager
+
+# Basic environment
+NODE_ENV: "production"
+NEXT_TELEMETRY_DISABLED: "1"
+
+# API Configuration  
+API_BASE_URL: "https://kripto-saat-strapi-651765797330.europe-west1.run.app"
+NEXT_PUBLIC_API_BASE_URL: "https://kripto-saat-strapi-651765797330.europe-west1.run.app"
+
+# Next.js Configuration
+NEXT_PUBLIC_SITE_URL: "https://kripto-saat-flash-651765797330.europe-west1.run.app"
+
+# Application Configuration
+ITEMS_PER_PAGE: "25"
+HOT_PAGES_LIMIT: "10"
+SEGMENT_SIZE: "25"
+UPDATE_CHECK_INTERVAL: "60000"
+
+# Secrets (will be injected from Secret Manager during deployment)
+# These are NOT set here - they come from Google Secret Manager:
+# - STRAPI_ADMIN_TOKEN (from secret: strapi-admin-token)
+# - STRAPI_API_TOKEN (from secret: strapi-api-token)
