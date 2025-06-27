@@ -33,6 +33,11 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# production config files (contain environment-specific config)
+env-production.yaml
+env-staging.yaml
+env-development.yaml
+
 # vercel
 .vercel
 

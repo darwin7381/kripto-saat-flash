@@ -1,0 +1,72 @@
+# Kripto Saat Flash - 生產環境配置範例
+# 
+# 重要：這是範例檔案，請複製為 env-production.yaml 並填入實際值
+# 注意：此檔案只包含非敏感資訊，敏感資訊請使用 Secret Manager
+#
+# 使用方式：
+# 1. cp env-production.yaml.example env-production.yaml
+# 2. 編輯 env-production.yaml 填入實際值
+# 3. 執行 ./setup-secrets.sh 設置敏感資訊
+# 4. 執行 ./deploy-with-secrets.sh 部署
+
+# ========================================
+# 應用程式配置
+# ========================================
+NODE_ENV: production
+PORT: "3000"
+NEXT_TELEMETRY_DISABLED: "1"
+
+# ========================================
+# 站點配置
+# ========================================
+SITE_URL: "https://flash.kriptosaat.com"
+SITE_NAME: "Kripto Saat Flash"
+FLASH_SUBDOMAIN: "https://flash.kriptosaat.com"
+
+# ========================================
+# Strapi 配置（非敏感部分）
+# ========================================
+# 替換為您的實際 Strapi 域名
+STRAPI_URL: "https://your-strapi-domain.com"
+
+# ========================================
+# WordPress 整合
+# ========================================
+WORDPRESS_URL: "https://kriptosaat.com"
+WORDPRESS_API_URL: "https://kriptosaat.com/wp-json/wp/v2"
+
+# ========================================
+# 功能開關
+# ========================================
+USE_MOCK_DATA: "false"
+
+# ========================================
+# SEO 配置
+# ========================================
+TWITTER_HANDLE: "@kriptosaat"
+
+# ========================================
+# Redis 配置（非敏感部分）
+# ========================================
+# 替換為您的實際 Redis 地址
+REDIS_URL: "redis://your-redis-host:6379"
+
+# ========================================
+# API 配置
+# ========================================
+ITEMS_PER_PAGE: "25"
+HOT_PAGES_LIMIT: "10"
+SEGMENT_SIZE: "25"
+UPDATE_CHECK_INTERVAL: "60000"
+
+# ========================================
+# 敏感資訊設置說明
+# ========================================
+# 以下敏感資訊請使用 Secret Manager 設置：
+# - STRAPI_API_TOKEN (Strapi API 存取 token)
+# - STRAPI_ADMIN_TOKEN (Strapi 管理員 token)
+# - REDIS_PASSWORD (Redis 密碼，如果有的話)
+# - CLOUDFLARE_TOKEN (Cloudflare API token)
+# - JWT_SECRET (JWT 簽名密鑰)
+#
+# 執行 ./setup-secrets.sh 來設置這些敏感資訊 
