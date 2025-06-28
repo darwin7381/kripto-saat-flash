@@ -18,24 +18,10 @@ interface FlashDetailPageProps {
   }>;
 }
 
-// 允許動態生成新的參數
-export const dynamicParams = true;
-
-// 預生成一些熱門快訊的靜態頁面
-export async function generateStaticParams() {
-  try {
-    // 獲取前20篇熱門快訊用於預生成
-    const flashData = await apiService.getHotFlashes(1, 20);
-    
-    return flashData.flashes.map((flash) => ({
-      slug: flash.slug,
-    }));
-  } catch (error) {
-    console.error('Error in generateStaticParams:', error);
-    // 如果獲取失敗，返回空數組，允許動態生成
-    return [];
-  }
-}
+// 移除錯誤的 SSG 配置，使用 SSR + 快取策略
+// 原因：內頁數量龐大（幾萬篇），SSG 不適用，但需要支援快取
+// ✅ SSR：每次請求時動態渲染，但結果可被 Cloudflare 快取
+// ❌ 不使用 force-dynamic，保持快取能力
 
 export async function generateMetadata({ params }: FlashDetailPageProps): Promise<Metadata> {
   const { slug } = await params;

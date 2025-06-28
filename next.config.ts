@@ -23,18 +23,14 @@ const nextConfig: NextConfig = {
     ];
   },
   
-  // Cloudflare Worker 路由重寫 - 必需保留
+  // Cloudflare Worker 路由重寫 - 修正版本
   async rewrites() {
     return [
       {
         source: '/api/:path*',
         destination: '/api/:path*',
       },
-      // 重寫 flash-* 路徑到 /flash/* 以支援 Cloudflare Worker 的路徑映射
-      {
-        source: '/:slug(flash-.*)',
-        destination: '/flash/:slug',
-      },
+      // 移除錯誤的 flash-* 規則，現在由 Worker 正確處理
     ];
   },
   
