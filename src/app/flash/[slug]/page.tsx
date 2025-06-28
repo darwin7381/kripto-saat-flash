@@ -18,6 +18,25 @@ interface FlashDetailPageProps {
   }>;
 }
 
+// 允許動態生成新的參數
+export const dynamicParams = true;
+
+// 預生成一些熱門快訊的靜態頁面
+export async function generateStaticParams() {
+  try {
+    // 獲取前20篇熱門快訊用於預生成
+    const flashData = await apiService.getHotFlashes(1, 20);
+    
+    return flashData.flashes.map((flash) => ({
+      slug: flash.slug,
+    }));
+  } catch (error) {
+    console.error('Error in generateStaticParams:', error);
+    // 如果獲取失敗，返回空數組，允許動態生成
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: FlashDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   

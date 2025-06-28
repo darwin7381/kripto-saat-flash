@@ -1,5 +1,9 @@
 import { config } from './config';
 import { Flash, FlashListResponse, SegmentResponse, UpdateCheckResponse, Category, Author, Tag } from '@/types/flash';
+import fetchPonyfill from 'fetch-ponyfill';
+
+// 使用 fetch-ponyfill 解決 Cloud Run 環境下 Next.js undici polyfill 問題
+const { fetch } = fetchPonyfill();
 
 // StrAPI 回應類型定義
 interface StrapiResponse<T> {
@@ -13,7 +17,6 @@ interface StrapiResponse<T> {
     };
   };
 }
-
 
 // STRAPI V5 Flash 直接格式（無 attributes 包裝）
 interface StrapiFlash {
@@ -105,9 +108,8 @@ export class ApiService {
     this.baseUrl = config.strapi.url;
     this.headers = {
       'Content-Type': 'application/json',
-      ...(config.strapi.apiToken && {
-        'Authorization': `Bearer ${config.strapi.apiToken}`,
-      }),
+      'User-Agent': 'Kripto-Saat-Flash/1.0 (+https://flash.kriptosaat.com)',
+      // 前端讀取發布內容無需認證，使用公開API
     };
   }
 
@@ -350,7 +352,6 @@ export class ApiService {
     
     try {
       const response = await fetch(url, {
-        ...options,
         headers: {
           ...this.headers,
           ...options?.headers,

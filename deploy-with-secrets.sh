@@ -63,16 +63,13 @@ AVAILABLE_SECRETS=""
 SECRETS_ARGS=""
 
 # 檢查各個 secret 是否存在
-for secret in strapi-api-token strapi-admin-token redis-password cloudflare-token jwt-secret; do
+for secret in strapi-admin-token redis-password cloudflare-token jwt-secret; do
     if gcloud secrets describe "$secret" &>/dev/null; then
         echo "   ✅ $secret"
         AVAILABLE_SECRETS="$AVAILABLE_SECRETS $secret"
         
         # 根據 secret 名稱設置對應的環境變數
         case $secret in
-            "strapi-api-token")
-                SECRETS_ARGS="$SECRETS_ARGS,STRAPI_API_TOKEN=$secret:latest"
-                ;;
             "strapi-admin-token")
                 SECRETS_ARGS="$SECRETS_ARGS,STRAPI_ADMIN_TOKEN=$secret:latest"
                 ;;

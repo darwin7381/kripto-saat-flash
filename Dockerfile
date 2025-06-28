@@ -14,6 +14,9 @@ RUN npm ci --only=production --no-audit --no-fund
 FROM base AS builder
 WORKDIR /app
 
+# 構建時需要的參數
+ARG STRAPI_URL=https://str.kriptosaat.com
+
 # 先複製 package 文件
 COPY package.json package-lock.json* ./
 # 安裝所有依賴（包括開發依賴）
@@ -22,9 +25,10 @@ RUN npm ci --no-audit --no-fund
 # 複製源碼
 COPY . .
 
-# 設置環境變數
+# 設置構建時環境變數
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV STRAPI_URL=$STRAPI_URL
 
 # 建構 Next.js 應用
 RUN npm run build

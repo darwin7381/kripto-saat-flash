@@ -2,7 +2,7 @@ export const config = {
   // StrAPI Configuration
   strapi: {
     url: process.env.STRAPI_URL || 'http://localhost:1337',
-    apiToken: process.env.STRAPI_API_TOKEN || '',
+    // 前端讀取內容無需API Token，使用公開API
   },
 
   // Redis Configuration
