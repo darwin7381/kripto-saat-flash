@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { apiService } from '@/lib/api';
 import { config } from '@/lib/config';
+import { apiService } from '@/lib/api';
 import { Flash } from '@/types/flash';
 import FlashListContainer from './FlashListContainer';
 
@@ -21,14 +21,35 @@ export default function LoadMoreButton({ initialHasMore }: LoadMoreButtonProps) 
     setLoading(true);
     const nextPage = page + 1;
     
+    console.log(`LoadMoreButton: Attempting to load page ${nextPage}`);
+    
     try {
+      // ✅ 統一使用 apiService (fetch-ponyfill)，與 SSR 格式一致
+      console.log(`LoadMoreButton: Fetching via apiService, page ${nextPage}`);
+      
       const flashData = await apiService.getHotFlashes(nextPage, config.api.itemsPerPage);
+      
+      console.log(`LoadMoreButton: API response:`, {
+        flashesCount: flashData.flashes.length,
+        hasNext: flashData.pagination.hasNext,
+        page: flashData.pagination.page
+      });
+      
       const loadedFlashes = flashData.flashes;
-      setNewFlashes(prev => [...prev, ...loadedFlashes]);
-      setHasMore(flashData.pagination.hasNext);
-      setPage(nextPage);
+      
+      if (loadedFlashes && Array.isArray(loadedFlashes)) {
+        console.log(`LoadMoreButton: Adding ${loadedFlashes.length} new flashes`);
+        setNewFlashes(prev => [...prev, ...loadedFlashes]);
+        setHasMore(flashData.pagination.hasNext);
+        setPage(nextPage);
+      } else {
+        console.error(`LoadMoreButton: Invalid flashes data:`, loadedFlashes);
+        throw new Error('Invalid flashes data structure');
+      }
     } catch (err) {
-      console.error('Error loading more flashes:', err);
+      console.error('LoadMoreButton: Error loading more flashes:', err);
+      // 顯示用戶友好的錯誤信息
+      alert(`載入失敗：${err instanceof Error ? err.message : '未知錯誤'}`);
     } finally {
       setLoading(false);
     }

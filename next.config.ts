@@ -56,6 +56,11 @@ const nextConfig: NextConfig = {
         hostname: 'str.kriptosaat.com',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'kriptosaat.com',
+        pathname: '/wp-content/uploads/**',
+      },
     ],
   },
 };

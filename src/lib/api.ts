@@ -1,24 +1,19 @@
-import { config } from './config';
-import { Flash, FlashListResponse, SegmentResponse, UpdateCheckResponse, Category, Author, Tag } from '@/types/flash';
 import fetchPonyfill from 'fetch-ponyfill';
-
-// 使用 fetch-ponyfill 解決 Cloud Run 環境下 Next.js undici polyfill 問題
 const { fetch } = fetchPonyfill();
 
-// StrAPI 回應類型定義
-interface StrapiResponse<T> {
-  data: T;
-  meta: {
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    };
-  };
-}
+import { 
+  Flash, 
+  FlashListResponse, 
+  SegmentResponse, 
+  UpdateCheckResponse, 
+  Category,
+  StrapiResponse,
+  Author
+} from '@/types/flash';
+import { Header, HeaderResponse } from '@/types/header';
+import { config } from '@/lib/config';
 
-// STRAPI V5 Flash 直接格式（無 attributes 包裝）
+// StrAPI V5 Flash數據結構（直接使用，無需轉換）
 interface StrapiFlash {
   id: number;
   documentId: string;
@@ -126,14 +121,14 @@ export class ApiService {
     const params = new URLSearchParams({
       'pagination[page]': page.toString(),
       'pagination[pageSize]': limit.toString(),
-      'sort': 'id:desc',
+      'sort': 'published_datetime:desc',
       'populate': '*',
     });
 
     const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     
     const response: FlashListResponse = {
-      flashes: data.data.map(item => this.transformFlash(item)),
+      flashes: data.data.map(item => this.processFlash(item)),
       pagination: {
         page: data.meta.pagination.page,
         limit: data.meta.pagination.pageSize,
@@ -185,7 +180,7 @@ export class ApiService {
     const latestHotPages = config.api.hotPagesLimit * config.api.itemsPerPage;
     const totalSegments = Math.ceil((totalFlashes - latestHotPages) / config.api.segmentSize);
 
-    const flashes = data.data.map(item => this.transformFlash(item));
+    const flashes = data.data.map(item => this.processFlash(item));
     const deletedIds = this.findDeletedIds(startId, endId, flashes);
 
     return {
@@ -208,7 +203,7 @@ export class ApiService {
     const params = new URLSearchParams({
       'filters[id][$gt]': lastId.toString(),
       'pagination[pageSize]': '1',
-      'sort': 'id:desc',
+      'sort': 'published_datetime:desc',
     });
 
     const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
@@ -236,7 +231,7 @@ export class ApiService {
       return null;
     }
 
-    return this.transformFlash(data.data[0]);
+    return this.processFlash(data.data[0]);
   }
 
   /**
@@ -247,14 +242,14 @@ export class ApiService {
       'filters[categories][slug][$eq]': categorySlug,
       'pagination[page]': page.toString(),
       'pagination[pageSize]': config.api.itemsPerPage.toString(),
-      'sort': 'id:desc',
+      'sort': 'published_datetime:desc',
       'populate': '*',
     });
 
     const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
     
     return {
-      flashes: data.data.map(item => this.transformFlash(item)),
+      flashes: data.data.map(item => this.processFlash(item)),
       pagination: {
         page: data.meta.pagination.page,
         limit: data.meta.pagination.pageSize,
@@ -274,12 +269,12 @@ export class ApiService {
     const params = new URLSearchParams({
       'filters[id][$ne]': flashId.toString(),
       'pagination[pageSize]': limit.toString(),
-      'sort': 'id:desc',
+      'sort': 'published_datetime:desc',
       'populate': '*',
     });
 
     const data = await this.request<StrapiResponse<StrapiFlash[]>>(`/api/flashes?${params}`);
-    return data.data.map(item => this.transformFlash(item));
+    return data.data.map(item => this.processFlash(item));
   }
 
   /**
@@ -291,24 +286,8 @@ export class ApiService {
       'sort': 'display_order:asc',
     });
 
-    const data = await this.request<StrapiResponse<Array<{
-      id: number;
-      documentId: string;
-      name: string;
-      slug: string;
-      description?: string;
-      wp_category_id?: number;
-      wp_sync_status?: 'pending' | 'synced' | 'failed';
-      display_order?: number;
-      is_active?: boolean;
-      parent_category?: {
-        id: number;
-        name: string;
-        slug: string;
-      };
-    }>>>(`/api/categories?${params}`);
-    
-    return data.data.map((item) => this.transformCategoryV5(item));
+    const data = await this.request<StrapiResponse<Category[]>>(`/api/categories?${params}`);
+    return data.data;
   }
 
   /**
@@ -320,28 +299,55 @@ export class ApiService {
       'populate': '*',
     });
 
-    const data = await this.request<StrapiResponse<Array<{
-      id: number;
-      documentId: string;
-      name: string;
-      slug: string;
-      description?: string;
-      wp_category_id?: number;
-      wp_sync_status?: 'pending' | 'synced' | 'failed';
-      display_order?: number;
-      is_active?: boolean;
-      parent_category?: {
-        id: number;
-        name: string;
-        slug: string;
-      };
-    }>>>(`/api/categories?${params}`);
+    const data = await this.request<StrapiResponse<Category[]>>(`/api/categories?${params}`);
     
     if (data.data.length === 0) {
       return null;
     }
 
-    return this.transformCategoryV5(data.data[0]);
+    return data.data[0];
+  }
+
+  /**
+   * 獲取 Header 配置
+   */
+  async getHeader(): Promise<Header | null> {
+    const params = new URLSearchParams({
+      'populate[logoLight]': '*',
+      'populate[logoDark]': '*',
+      'populate[mainNavigation][populate][dropdownItems]': '*',
+      'populate[topBar]': '*',
+    });
+
+    try {
+      const data = await this.request<HeaderResponse>(`/api/header?${params}`);
+      
+      if (!data.data) {
+        return null;
+      }
+
+      // 處理圖片URL
+      const processedHeader = { ...data.data };
+      
+      if (processedHeader.logoLight && !processedHeader.logoLight.url.startsWith('http')) {
+        processedHeader.logoLight = {
+          ...processedHeader.logoLight,
+          url: `${this.baseUrl}${processedHeader.logoLight.url}`,
+        };
+      }
+      
+      if (processedHeader.logoDark && !processedHeader.logoDark.url.startsWith('http')) {
+        processedHeader.logoDark = {
+          ...processedHeader.logoDark,
+          url: `${this.baseUrl}${processedHeader.logoDark.url}`,
+        };
+      }
+
+      return processedHeader;
+    } catch (error) {
+      console.error('Failed to fetch header:', error);
+      return null;
+    }
   }
 
   /**
@@ -356,6 +362,7 @@ export class ApiService {
           ...this.headers,
           ...options?.headers,
         },
+        ...options,
       });
 
       if (!response.ok) {
@@ -375,129 +382,29 @@ export class ApiService {
   }
 
   /**
-   * 轉換StrAPI V5數據格式為內部格式
+   * 私有方法：處理快訊資料格式化
    */
-  private transformFlash(data: StrapiFlash): Flash {
-    return {
-      id: data.id,
-      title: data.title,
-      content: data.content,
-      excerpt: data.excerpt || '',
-      slug: data.slug,
-      published_datetime: data.published_datetime,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      publishedAt: data.publishedAt,
-      is_important: data.is_important || false,
-      is_featured: data.is_featured || false,
-      view_count: data.view_count || 0,
-      source_url: data.source_url,
-      bullish_count: data.bullish_count || 0,
-      bearish_count: data.bearish_count || 0,
-      author: this.transformAuthor(data.author),
-      categories: data.categories?.map((cat) => this.transformCategoryV5(cat)) || [],
-      tags: data.tags?.map((tag) => this.transformTag(tag)) || [],
-      featured_image: data.featured_image ? {
-        id: data.featured_image.id,
-        url: data.featured_image.url.startsWith('http') 
-          ? data.featured_image.url 
-          : `${this.baseUrl}${data.featured_image.url}`,
-        alt: data.featured_image.alternativeText || '',
-        width: data.featured_image.width || 0,
-        height: data.featured_image.height || 0,
-        formats: data.featured_image.formats,
-      } : undefined,
-      meta: {
-        views: data.view_count || 0,
-        reading_time: Math.ceil(data.content.length / 200),
-        source_url: data.source_url,
-        bullish_count: data.bullish_count || 0,
-        bearish_count: data.bearish_count || 0,
-      },
-    };
-  }
-
-  /**
-   * 轉換 STRAPI V5 Author 數據
-   */
-  private transformAuthor(authorData?: StrapiFlash['author']): Author {
-    if (!authorData) {
-      return {
-        id: 0,
-        name: 'Anonymous',
+  private processFlash(flash: StrapiFlash): Flash {
+    // 處理圖片URL（如果需要加上base URL）
+    const processedFlash = { ...flash };
+    if (flash.featured_image && !flash.featured_image.url.startsWith('http')) {
+      processedFlash.featured_image = {
+        ...flash.featured_image,
+        url: `${this.baseUrl}${flash.featured_image.url}`,
       };
     }
 
-    return {
-      id: authorData.id,
-      name: authorData.name || 'Anonymous',
-      email: authorData.email,
-      bio: authorData.bio,
-      wp_user_id: authorData.wp_user_id,
-      wp_sync_status: authorData.wp_sync_status || 'pending',
-      social_links: authorData.social_links,
-      avatar: authorData.avatar ? {
-        id: authorData.avatar.id,
-        url: authorData.avatar.url,
-        alt: authorData.avatar.alternativeText || '',
-        width: authorData.avatar.width,
-        height: authorData.avatar.height,
-        formats: authorData.avatar.formats,
-      } : undefined,
+    // 提供預設值以符合 Flash 類型要求
+    const defaultAuthor: Author = {
+      id: 0,
+      name: 'Unknown Author',
     };
-  }
 
-  /**
-   * 轉換 STRAPI V5 Category 數據（新方法）
-   */
-  private transformCategoryV5(categoryData: {
-    id: number;
-    documentId: string;
-    name: string;
-    slug: string;
-    description?: string;
-    wp_category_id?: number;
-    wp_sync_status?: 'pending' | 'synced' | 'failed';
-    display_order?: number;
-    is_active?: boolean;
-    parent_category?: {
-      id: number;
-      name: string;
-      slug: string;
-    };
-  }): Category {
     return {
-      id: categoryData.id,
-      name: categoryData.name,
-      slug: categoryData.slug,
-      description: categoryData.description,
-      wp_category_id: categoryData.wp_category_id,
-      wp_sync_status: categoryData.wp_sync_status || 'pending',
-      display_order: categoryData.display_order || 0,
-      is_active: categoryData.is_active !== false,
-      parent_category: categoryData.parent_category ? {
-        id: categoryData.parent_category.id,
-        name: categoryData.parent_category.name,
-        slug: categoryData.parent_category.slug,
-      } : undefined,
-    };
-  }
-
-  /**
-   * 轉換 STRAPI V5 Tag 數據
-   */
-  private transformTag(tagData: NonNullable<StrapiFlash['tags']>[0]): Tag {
-    return {
-      id: tagData.id,
-      name: tagData.name,
-      slug: tagData.slug,
-      description: tagData.description,
-      wp_tag_id: tagData.wp_tag_id,
-      wp_sync_status: tagData.wp_sync_status || 'pending',
-      usage_count: tagData.usage_count || 0,
-      elasticsearch_synced: tagData.elasticsearch_synced || false,
-      color: tagData.color,
-      is_active: tagData.is_active !== false,
+      ...processedFlash,
+      author: flash.author || defaultAuthor,
+      categories: flash.categories || [],
+      tags: flash.tags || [],
     };
   }
 

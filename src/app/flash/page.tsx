@@ -17,23 +17,28 @@ export const metadata: Metadata = {
   },
 };
 
+// 30秒重新驗證確保內容更新
+export const revalidate = 30;
+
 export default async function FlashPage() {
-  // 在服務器端獲取初始數據
   let initialFlashes: Flash[] = [];
   let hasMore = true;
   
   try {
-    console.log('SSR: Attempting to fetch flashes...');
+    console.log('SSR: Fetching flashes via apiService (fetch-ponyfill)...');
     
-    // 使用 STRAPI API 獲取數據
+    // ✅ 使用 apiService (fetch-ponyfill) 避免 CloudRun fetch bug
     const flashData = await apiService.getHotFlashes(1, config.api.itemsPerPage);
+    
     console.log('SSR: Fetched flashes:', flashData.flashes.length);
+    
+    // ✅ apiService 直接返回 { flashes: [...], pagination: {...} } 格式
     initialFlashes = flashData.flashes;
     hasMore = flashData.pagination.hasNext;
+    
+    console.log('SSR: Loaded', initialFlashes.length, 'flashes, hasMore:', hasMore);
   } catch (error) {
-    console.error('SSR Error fetching initial flashes:', error);
-    console.error('SSR Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    // 發生錯誤時使用空數據，避免整個頁面崩潰
+    console.error('SSR Error:', error);
     initialFlashes = [];
     hasMore = false;
   }

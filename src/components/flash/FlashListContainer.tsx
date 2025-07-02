@@ -38,8 +38,20 @@ const groupFlashesByDate = (flashes: Flash[]) => {
   const groups: { [key: string]: { date: Date; flashes: Flash[] } } = {};
   
   flashes.forEach(flash => {
-    // 直接使用 STRAPI 的 published_datetime 欄位
-    const date = new Date(flash.published_datetime);
+    // 驗證並處理 STRAPI 的 published_datetime 欄位
+    let date: Date;
+    try {
+      date = new Date(flash.published_datetime);
+      // 檢查日期是否有效
+      if (isNaN(date.getTime())) {
+        console.warn(`Invalid date for flash ${flash.id}: ${flash.published_datetime}`);
+        date = new Date(); // 使用當前時間作為後備
+      }
+    } catch (error) {
+      console.warn(`Error parsing date for flash ${flash.id}: ${flash.published_datetime}`, error);
+      date = new Date(); // 使用當前時間作為後備
+    }
+    
     const dateKey = date.toDateString();
     
     if (!groups[dateKey]) {
@@ -50,6 +62,15 @@ const groupFlashesByDate = (flashes: Flash[]) => {
     }
     
     groups[dateKey].flashes.push(flash);
+  });
+  
+  // ✅ 對每個日期分組內部按發布時間降序排列（最新的在前）
+  Object.values(groups).forEach(group => {
+    group.flashes.sort((a, b) => {
+      const timeA = new Date(a.published_datetime).getTime();
+      const timeB = new Date(b.published_datetime).getTime();
+      return timeB - timeA; // 降序：最新的在前
+    });
   });
   
   // 按日期排序（最新的在前）

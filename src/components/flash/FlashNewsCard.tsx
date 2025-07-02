@@ -16,8 +16,18 @@ export default function FlashNewsCard({ flash, isImportant = false }: FlashNewsC
 
   // 格式化時間 - 只顯示時分
   const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    try {
+      const date = new Date(dateString);
+      // 檢查日期是否有效
+      if (isNaN(date.getTime())) {
+        console.warn(`Invalid date in FlashNewsCard: ${dateString}`);
+        return '--:--'; // 返回默認時間格式
+      }
+      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    } catch (error) {
+      console.warn(`Error formatting time: ${dateString}`, error);
+      return '--:--'; // 返回默認時間格式
+    }
   };
 
   // 使用 flash.id 生成確定性的市場標籤數據

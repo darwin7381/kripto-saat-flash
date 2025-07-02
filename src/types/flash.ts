@@ -118,4 +118,17 @@ export interface ApiResponse<T> {
   success: boolean;
   error?: string;
   message?: string;
+}
+
+// Strapi V5 標準響應格式
+export interface StrapiResponse<T> {
+  data: T;
+  meta: {
+    pagination: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
 } 
