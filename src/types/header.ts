@@ -23,49 +23,36 @@ export interface DropdownItem {
 }
 
 export interface NavigationItem {
-  id: number;
-  title: string;
-  url?: string;
-  isExternal: boolean;
-  openInNewTab: boolean;
-  icon?: string;
-  badge?: string;
-  order: number;
-  isActive: boolean;
-  hasDropdown: boolean;
-  dropdownItems?: DropdownItem[];
-  cssClass?: string;
+  text: string;
+  url: string;
+  hasDropdown?: boolean;
+  children?: DropdownItem[];
 }
 
-export interface TopBar {
-  id: number;
+export interface TopBarSettings {
   enableTopBar: boolean;
-  htmlContent?: string;
   backgroundColor: string;
   height: string;
-  cssClass?: string;
+  htmlContent: string;
 }
 
-export interface Header {
-  id: number;
-  documentId: string;
-  logoLight?: HeaderMedia;
-  logoDark?: HeaderMedia;
+export interface LogoImage {
+  url: string;
+  alt?: string;
+}
+
+export interface HeaderData {
   logoText: string;
   logoUrl: string;
-  logoAltText: string;
+  logoLight?: LogoImage;  // 白日版 Logo
+  logoDark?: LogoImage;   // 暗夜版 Logo
   mainNavigation: NavigationItem[];
   enableSearch: boolean;
   searchPlaceholder: string;
-  topBar?: TopBar;
-  enableDarkMode: boolean;
-  stickyHeader: boolean;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt?: string;
+  topBar: TopBarSettings;
 }
 
 export interface HeaderResponse {
-  data: Header;
-  meta: Record<string, unknown>;
+  data: HeaderData;
+  error?: string;
 } 
