@@ -22,6 +22,7 @@ export default function MobileSidebar({
   searchPlaceholder = 'Ara...'
 }: MobileSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [openDropdowns, setOpenDropdowns] = useState<Set<number>>(new Set());
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +31,27 @@ export default function MobileSidebar({
       const searchUrl = `https://kriptosaat.com/?s=${encodeURIComponent(searchQuery.trim())}`;
       window.open(searchUrl, '_blank');
       setSearchQuery('');
+      onClose();
+    }
+  };
+
+  const toggleDropdown = (index: number) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const handleNavItemClick = (item: NavigationItem, index: number, e: React.MouseEvent) => {
+    if (item.hasDropdown && item.children && item.children.length > 0) {
+      e.preventDefault();
+      toggleDropdown(index);
+    } else {
       onClose();
     }
   };
@@ -100,7 +122,7 @@ export default function MobileSidebar({
                     <Link 
                       href={item.url} 
                       className="block py-2 text-black hover:text-red-600 transition-colors"
-                      onClick={onClose}
+                      onClick={(e) => handleNavItemClick(item, index, e)}
                       style={{ 
                         fontSize: '16px', 
                         fontFamily: '"Helvetica Neue", Helvetica, Roboto, Arial, sans-serif',
@@ -109,12 +131,14 @@ export default function MobileSidebar({
                     >
                       {item.text}
                       {item.hasDropdown && (
-                        <i className="fa fa-angle-down ml-2" style={{ fontSize: '12px' }}></i>
+                        <i className={`fa fa-angle-down ml-2 transition-transform duration-200 ${
+                          openDropdowns.has(index) ? 'rotate-180' : ''
+                        }`} style={{ fontSize: '12px' }}></i>
                       )}
                     </Link>
                     
-                    {/* 手機版下拉選單項目 */}
-                    {item.hasDropdown && item.children && (
+                    {/* 手機版下拉選單項目 - 只有展開時才顯示 */}
+                    {item.hasDropdown && item.children && openDropdowns.has(index) && (
                       <ul className="ml-4 mt-2 space-y-2">
                         {item.children
                           .filter(child => child.isActive)

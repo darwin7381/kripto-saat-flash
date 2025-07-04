@@ -45,8 +45,8 @@ export default async function FlashPage() {
 
   return (
     <ClientLayout>
-      <main className="max-w-[1200px] mx-auto px-4 py-6 flex-1 w-full">
-        <div className="flex gap-5">
+      <main className="max-w-[1200px] mx-auto px-[15px] py-6 flex-1 w-full">
+        <div className="flex gap-6">
           {/* Left Column - News */}
           <div className="flex-1 max-w-[820px]">
             {/* News Header - SSR 渲染 */}

@@ -32,7 +32,7 @@ export default function Logo({
   return (
     <div className={`jeg_midbar jeg_container jeg_navbar_wrapper normal ${className}`} 
          style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1200px] mx-auto px-[15px]">
         <div className="jeg_nav_row flex items-center justify-center py-6">
           <div className="jeg_nav_item jeg_logo jeg_desktop_logo">
             <h1 className="site-title">

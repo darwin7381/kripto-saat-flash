@@ -6,13 +6,13 @@ export default function Footer() {
     <footer className="bg-black text-gray-300 mt-auto">
       {/* Disclaimer Bar */}
       <div className="bg-[#2D2D2D] py-3">
-        <div className="container mx-auto px-4 text-center text-xs">
+        <div className="max-w-[1200px] mx-auto px-[15px] text-center text-xs">
           免責聲明：幣世界作為開放的信息發布平台，所提供的所有資訊與幣世界觀點和立場無關，且不構成任何投資理財建議。望用戶仔細甄別，防範風險。
         </div>
       </div>
       
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-10">
+      <div className="max-w-[1200px] mx-auto px-[15px] py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo and Description */}
           <div>

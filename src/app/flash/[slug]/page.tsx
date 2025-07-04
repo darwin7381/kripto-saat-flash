@@ -150,8 +150,8 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-      <main className="max-w-[1200px] mx-auto px-4 py-6 flex-1 w-full">
-        <div className="flex gap-5">
+      <main className="max-w-[1200px] mx-auto px-[15px] py-6 flex-1 w-full">
+        <div className="flex gap-6">
           {/* 主要內容區 */}
           <div className="flex-1 max-w-[820px]">
             <div className="bg-white rounded-lg p-6">

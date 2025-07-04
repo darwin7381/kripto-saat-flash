@@ -10,7 +10,7 @@ export default function HeaderDemo() {
       <HeaderNew />
       
       {/* 演示內容 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-[1200px] mx-auto px-[15px] py-8">
         <div className="bg-white rounded-lg shadow p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
             🎯 真正精確的 kriptosaat.com Header 復刻

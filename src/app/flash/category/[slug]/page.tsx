@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { apiService } from '@/lib/api';
 import { config } from '@/lib/config';
 import { Flash } from '@/types/flash';
+import ClientLayout from '@/components/layout/ClientLayout';
 
 interface CategoryPageProps {
   params: Promise<{
@@ -70,37 +71,33 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     const { flashes, pagination } = flashListResponse;
 
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-          
-          {/* 麵包屑導航 */}
-          <Breadcrumb className="mb-6">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">首頁</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/flash">快訊</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{category.name}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          {/* 返回按鈕 */}
-          <Link 
-            href="/flash" 
-            className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回快訊列表
-          </Link>
-
-          {/* 分類標題 */}
+      <ClientLayout>
+        <div className="max-w-[1200px] mx-auto px-[15px] py-8">
           <div className="mb-8">
+            <Breadcrumb className="mb-6">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">首頁</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/flash">快訊</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{category.name}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
+            <Link 
+              href="/flash" 
+              className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回快訊列表
+            </Link>
+
             <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
             {category.description && (
               <p className="text-muted-foreground text-lg">{category.description}</p>
@@ -110,7 +107,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             </p>
           </div>
 
-          {/* 快訊列表 */}
           {flashes.length > 0 ? (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -119,7 +115,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                 ))}
               </div>
 
-              {/* 分頁導航 */}
               {pagination.totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
                   {pagination.hasPrev && (
@@ -149,7 +144,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             </div>
           )}
         </div>
-      </div>
+      </ClientLayout>
     );
   } catch (error) {
     console.error('Error loading category page:', error);

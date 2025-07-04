@@ -48,7 +48,7 @@ export default function HeaderNew() {
     return (
       <div className="jeg_header normal">
         <div className="jeg_topbar" style={{ backgroundColor: 'rgb(33, 33, 33)', height: '40px' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center">
+          <div className="max-w-[1200px] mx-auto px-[15px] h-full flex items-center justify-center">
             <span className="text-white text-sm">載入中...</span>
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function HeaderNew() {
               color: 'rgb(245, 245, 245)' 
             }}
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div className="max-w-[1200px] mx-auto px-[15px] h-full">
               <div className="jeg_nav_row flex items-center justify-between h-full">
                 {/* Left - 天氣 + 日期 */}
                 <WeatherDisplay />
@@ -101,7 +101,7 @@ export default function HeaderNew() {
         {/* jeg_bottombar - 精確復刻 */}
         <div className="jeg_bottombar jeg_navbar jeg_container jeg_navbar_wrapper jeg_navbar_normal" 
              style={{ backgroundColor: 'rgb(255, 255, 255)', height: '50px' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1200px] mx-auto px-[15px]">
             <div className="jeg_nav_row flex items-center justify-between h-full">
               
               {/* Left - Hamburger Menu */}
