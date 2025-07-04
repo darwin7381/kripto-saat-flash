@@ -2,6 +2,59 @@ import { NextResponse } from 'next/server';
 
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 
+// 定義 Strapi 數據結構類型
+interface StrapiNavigationItem {
+  id: number;
+  title: string;
+  url: string;
+  hasDropdown?: boolean;
+  order?: number;
+  isActive?: boolean;
+  dropdownItems?: StrapiDropdownItem[];
+}
+
+interface StrapiDropdownItem {
+  id: number;
+  title: string;
+  url: string;
+  description?: string;
+  icon?: string;
+  isExternal?: boolean;
+  openInNewTab?: boolean;
+  order?: number;
+  isActive?: boolean;
+  badge?: string;
+  cssClass?: string;
+}
+
+interface StrapiTopBar {
+  enableTopBar?: boolean;
+  backgroundColor?: string;
+  height?: string;
+  htmlContent?: string;
+}
+
+interface StrapiHeaderData {
+  logoText?: string;
+  logoUrl?: string;
+  logoLight?: {
+    data?: {
+      url: string;
+      alternativeText?: string;
+    };
+  };
+  logoDark?: {
+    data?: {
+      url: string;
+      alternativeText?: string;
+    };
+  };
+  mainNavigation?: StrapiNavigationItem[];
+  enableSearch?: boolean;
+  searchPlaceholder?: string;
+  topBar?: StrapiTopBar;
+}
+
 export async function GET() {
   try {
     // 使用正確的 Strapi 5 深層 populate 語法（URL 編碼）
@@ -22,7 +75,7 @@ export async function GET() {
     console.log('STRAPI 完整回應:', JSON.stringify(strapiResponse, null, 2));
     
     // Strapi 5 的數據結構是扁平的，直接在 data 中
-    const strapiData = strapiResponse.data;
+    const strapiData: StrapiHeaderData = strapiResponse.data;
     
     // 轉換 Strapi 數據格式為前端需要的格式
     const headerData = {
@@ -45,17 +98,17 @@ export async function GET() {
       // 正確處理 STRAPI mainNavigation 數據，包含下拉選單
       mainNavigation: Array.isArray(strapiData?.mainNavigation) ? 
         strapiData.mainNavigation
-          .filter((item: any) => item.isActive !== false) // 預設啟用，除非明確設為 false
-          .sort((a: any, b: any) => (a.order || 0) - (b.order || 0)) // 使用 STRAPI 的 order 欄位
-          .map((item: any) => ({
+          .filter((item: StrapiNavigationItem) => item.isActive !== false) // 預設啟用，除非明確設為 false
+          .sort((a: StrapiNavigationItem, b: StrapiNavigationItem) => (a.order || 0) - (b.order || 0)) // 使用 STRAPI 的 order 欄位
+          .map((item: StrapiNavigationItem) => ({
             text: item.title,
             url: item.url,
             hasDropdown: item.hasDropdown || false,
             children: item.dropdownItems && Array.isArray(item.dropdownItems) ? 
               item.dropdownItems
-                .filter((child: any) => child.isActive !== false)
-                .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
-                .map((child: any) => ({
+                .filter((child: StrapiDropdownItem) => child.isActive !== false)
+                .sort((a: StrapiDropdownItem, b: StrapiDropdownItem) => (a.order || 0) - (b.order || 0))
+                .map((child: StrapiDropdownItem) => ({
                   id: child.id,
                   title: child.title,
                   url: child.url,

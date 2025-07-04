@@ -10,7 +10,7 @@ import {
   StrapiResponse,
   Author
 } from '@/types/flash';
-import { Header, HeaderResponse } from '@/types/header';
+import { HeaderData, HeaderResponse } from '@/types/header';
 import { config } from '@/lib/config';
 
 // StrAPI V5 Flash數據結構（直接使用，無需轉換）
@@ -311,7 +311,7 @@ export class ApiService {
   /**
    * 獲取 Header 配置
    */
-  async getHeader(): Promise<Header | null> {
+  async getHeader(): Promise<HeaderData | null> {
     const params = new URLSearchParams({
       'populate[logoLight]': '*',
       'populate[logoDark]': '*',
@@ -385,26 +385,42 @@ export class ApiService {
    * 私有方法：處理快訊資料格式化
    */
   private processFlash(flash: StrapiFlash): Flash {
-    // 處理圖片URL（如果需要加上base URL）
-    const processedFlash = { ...flash };
-    if (flash.featured_image && !flash.featured_image.url.startsWith('http')) {
-      processedFlash.featured_image = {
-        ...flash.featured_image,
-        url: `${this.baseUrl}${flash.featured_image.url}`,
-      };
-    }
-
     // 提供預設值以符合 Flash 類型要求
     const defaultAuthor: Author = {
       id: 0,
       name: 'Unknown Author',
     };
 
+    // 處理圖片URL（如果需要加上base URL）
+    let processedFeaturedImage = flash.featured_image;
+    if (flash.featured_image && !flash.featured_image.url.startsWith('http')) {
+      processedFeaturedImage = {
+        ...flash.featured_image,
+        url: `${this.baseUrl}${flash.featured_image.url}`,
+      };
+    }
+
+    // 明確返回所有必要字段，避免類型不匹配問題
     return {
-      ...processedFlash,
+      id: flash.id,
+      title: flash.title,
+      content: flash.content,
+      excerpt: flash.excerpt,
+      slug: flash.slug,
+      published_datetime: flash.published_datetime,
+      createdAt: flash.createdAt,
+      updatedAt: flash.updatedAt,
+      publishedAt: flash.publishedAt,
+      is_important: flash.is_important,
+      is_featured: flash.is_featured,
+      view_count: flash.view_count,
+      source_url: flash.source_url,
+      bullish_count: flash.bullish_count,
+      bearish_count: flash.bearish_count,
       author: flash.author || defaultAuthor,
       categories: flash.categories || [],
       tags: flash.tags || [],
+      featured_image: processedFeaturedImage,
     };
   }
 
