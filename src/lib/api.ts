@@ -1,5 +1,4 @@
 import fetchPonyfill from 'fetch-ponyfill';
-const { fetch } = fetchPonyfill();
 
 import { 
   Flash, 
@@ -12,6 +11,19 @@ import {
 } from '@/types/flash';
 import { HeaderData, HeaderResponse } from '@/types/header';
 import { config } from '@/lib/config';
+
+// Safari相容性修復：智能fetch選擇
+const getFetch = () => {
+  // 在瀏覽器環境使用原生fetch（修復Safari相容性）
+  if (typeof window !== 'undefined') {
+    return window.fetch.bind(window);
+  }
+  // 服務器環境使用ponyfill（CloudRun需要）
+  const { fetch } = fetchPonyfill();
+  return fetch;
+};
+
+const fetch = getFetch();
 
 // StrAPI V5 Flash數據結構（直接使用，無需轉換）
 interface StrapiFlash {
@@ -101,10 +113,11 @@ export class ApiService {
 
   constructor() {
     this.baseUrl = config.strapi.url;
+    // Safari相容性：簡化headers配置
     this.headers = {
       'Content-Type': 'application/json',
-      'User-Agent': 'Kripto-Saat-Flash/1.0 (+https://flash.kriptosaat.com)',
       // 前端讀取發布內容無需認證，使用公開API
+      // 移除User-Agent以確保Safari相容性
     };
   }
 
@@ -352,18 +365,31 @@ export class ApiService {
 
   /**
    * 私有方法：發送HTTP請求
+   * Safari相容性優化版本
    */
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     
     try {
-      const response = await fetch(url, {
+      // Safari相容性優化：簡化請求配置
+      const requestConfig: RequestInit = {
+        method: 'GET',
         headers: {
-          ...this.headers,
+          'Content-Type': 'application/json',
           ...options?.headers,
         },
+        // Safari相容性：避免不必要的options
         ...options,
-      });
+      };
+
+      // Safari相容性：移除可能導致問題的headers
+      if (typeof window !== 'undefined' && requestConfig.headers) {
+        // 瀏覽器環境：確保Safari相容性
+        const headers = requestConfig.headers as Record<string, string>;
+        delete headers['User-Agent'];
+      }
+
+      const response = await fetch(url, requestConfig);
 
       if (!response.ok) {
         throw new ApiError(
