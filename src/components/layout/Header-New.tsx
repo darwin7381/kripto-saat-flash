@@ -9,6 +9,7 @@ import Logo from './Logo';
 import HamburgerMenu from './HamburgerMenu';
 import SearchButton from './SearchButton';
 import TradingViewWidget from './TradingViewWidget';
+import StickyHeader from './StickyHeader';
 import { useHeader } from '@/lib/hooks/useHeader';
 
 export default function HeaderNew() {
@@ -45,7 +46,7 @@ export default function HeaderNew() {
 
   // 載入狀態
   if (loading) {
-    return (
+  return (
       <div className="jeg_header normal">
         <div className="jeg_topbar" style={{ backgroundColor: 'rgb(33, 33, 33)', height: '40px' }}>
           <div className="max-w-[1200px] mx-auto px-[15px] h-full flex items-center justify-center">
@@ -60,7 +61,7 @@ export default function HeaderNew() {
     <>
       {/* TradingView Widget */}
       <TradingViewWidget />
-      
+
       {/* jeg_header normal */}
       <div className="jeg_header normal">
         
@@ -75,7 +76,7 @@ export default function HeaderNew() {
             }}
           >
             <div className="max-w-[1200px] mx-auto px-[15px] h-full">
-              <div className="jeg_nav_row flex items-center justify-between h-full">
+            <div className="jeg_nav_row flex items-center justify-between h-full">
                 {/* Left - 天氣 + 日期 */}
                 <WeatherDisplay />
 
@@ -96,7 +97,7 @@ export default function HeaderNew() {
           logoUrl={headerData?.logoUrl}
           logoLight={headerData?.logoLight}
           logoDark={headerData?.logoDark}
-        />
+                    />
 
         {/* jeg_bottombar - 精確復刻 */}
         <div className="jeg_bottombar jeg_navbar jeg_container jeg_navbar_wrapper jeg_navbar_normal" 
@@ -128,6 +129,9 @@ export default function HeaderNew() {
         navigationItems={headerData?.mainNavigation}
         searchPlaceholder={headerData?.searchPlaceholder}
       />
+
+      {/* Sticky Header */}
+      <StickyHeader headerData={headerData} />
 
       {/* FontAwesome for icons */}
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />

@@ -1,13 +1,32 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import HeaderNew from '@/components/layout/Header-New';
 
 export default function HeaderDemo() {
+  const [scrollY, setScrollY] = useState(0);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 通過 Playwright 精確復刻的 Header 組件 */}
       <HeaderNew />
+      
+      {/* 滾動位置指示器 */}
+      <div className="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+        <div className="text-sm font-medium">滾動位置: {scrollY}px</div>
+        <div className="text-xs">
+          {scrollY > 150 ? '✅ Sticky Header 顯示' : '❌ Sticky Header 隱藏'}
+        </div>
+      </div>
       
       {/* 演示內容 */}
       <main className="max-w-[1200px] mx-auto px-[15px] py-8">
@@ -100,6 +119,55 @@ export default function HeaderDemo() {
                 用戶可以在 TradingView Widget 區域嵌入真實的 iframe，
                 並開始將此 Header 整合到主要頁面佈局中。
               </p>
+            </div>
+
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <h3 className="font-semibold text-orange-800 mb-3">🎯 Sticky Header 測試</h3>
+              <p className="text-orange-700 text-sm mb-4">
+                向下滾動頁面超過150px，您將看到一個sticky header顯示在頂部，包含：
+              </p>
+              <ul className="text-orange-700 text-sm space-y-1">
+                <li>✓ 左側：Logo（從STRAPI動態載入）</li>
+                <li>✓ 中間：主導航菜單（桌面版）</li>
+                <li>✓ 右側：搜索按鈕 + 移動菜單按鈕</li>
+                <li>✓ 平滑的滑入/滑出動畫</li>
+                <li>✓ 右上角實時滾動位置指示器</li>
+              </ul>
+            </div>
+
+            {/* 添加更多內容以供滾動測試 */}
+            <div className="space-y-6">
+              {Array.from({ length: 10 }, (_, i) => (
+                <div key={i} className="bg-gray-100 border border-gray-200 rounded-lg p-6">
+                  <h4 className="font-semibold text-gray-800 mb-3">
+                    測試內容區塊 {i + 1}
+                  </h4>
+                  <p className="text-gray-600 text-sm mb-4">
+                    這是用於測試 sticky header 功能的示例內容。
+                    當您向下滾動頁面時，您應該能夠看到 sticky header 在頂部顯示。
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-white p-4 rounded border">
+                      <h5 className="font-medium text-gray-800 mb-2">功能特點</h5>
+                      <ul className="text-gray-600 text-sm space-y-1">
+                        <li>• 響應式設計</li>
+                        <li>• 平滑動畫效果</li>
+                        <li>• 移動端友好</li>
+                        <li>• 搜索功能整合</li>
+                      </ul>
+                    </div>
+                    <div className="bg-white p-4 rounded border">
+                      <h5 className="font-medium text-gray-800 mb-2">技術實現</h5>
+                      <ul className="text-gray-600 text-sm space-y-1">
+                        <li>• 滾動監聽器</li>
+                        <li>• CSS 過渡效果</li>
+                        <li>• 條件渲染</li>
+                        <li>• 狀態管理</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -74,29 +74,29 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       <ClientLayout>
         <div className="max-w-[1200px] mx-auto px-[15px] py-8">
           <div className="mb-8">
-            <Breadcrumb className="mb-6">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">首頁</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/flash">快訊</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{category.name}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">首頁</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/flash">快訊</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{category.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-            <Link 
-              href="/flash" 
-              className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回快訊列表
-            </Link>
+          <Link 
+            href="/flash" 
+            className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            返回快訊列表
+          </Link>
 
             <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
             {category.description && (
