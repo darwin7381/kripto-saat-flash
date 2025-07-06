@@ -8,6 +8,7 @@ import { zhTW } from 'date-fns/locale';
 
 interface FlashListContainerProps {
   flashes: Flash[];
+  skipFirstDateHeader?: boolean; // 新參數：跳過第一個日期標題（用於LoadMore內容）
 }
 
 // 將日期格式化為標準格式
@@ -77,25 +78,27 @@ const groupFlashesByDate = (flashes: Flash[]) => {
   return Object.values(groups).sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
-export default function FlashListContainer({ flashes }: FlashListContainerProps) {
+export default function FlashListContainer({ flashes, skipFirstDateHeader = false }: FlashListContainerProps) {
   const groupedFlashes = groupFlashesByDate(flashes);
   
   return (
     <div className="flash-list-container bg-white">
       {groupedFlashes.map((group, dateIndex) => (
         <div key={group.date.toISOString()} className="date-section">
-          {/* 日期標籤 - 使用 sticky 定位，確保 z-index 低於 Header (z-50) */}
-          <div 
-            className="sticky bg-[#f9f9f9] border-b border-[#e5e5e5] px-6 py-3"
-            style={{ 
-              top: '56px',
-              zIndex: 40 - dateIndex  // 40, 39, 38... 確保低於 Header 的 z-50
-            }}
-          >
-            <span className="text-[#333] text-sm font-medium">
-              {formatDateLabel(group.date)}
-            </span>
-          </div>
+          {/* 日期標籤 - 條件性渲染：如果是第一個且設置了跳過，則不渲染 */}
+          {!(skipFirstDateHeader && dateIndex === 0) && (
+            <div 
+              className="sticky bg-[#f9f9f9] border-b border-[#e5e5e5] px-6 py-3"
+              style={{ 
+                top: '56px',
+                zIndex: 40 - dateIndex  // 40, 39, 38... 確保低於 Header 的 z-50
+              }}
+            >
+              <span className="text-[#333] text-sm font-medium">
+                {formatDateLabel(group.date)}
+              </span>
+            </div>
+          )}
           
           {/* 該日期的所有快訊 */}
           <div className="flash-list">

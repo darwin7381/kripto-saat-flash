@@ -1,7 +1,7 @@
 export const config = {
   // StrAPI Configuration
   strapi: {
-    url: process.env.STRAPI_URL || 'http://localhost:1337',
+    url: process.env.STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_URL || 'https://str.kriptosaat.com',
     // 前端讀取內容無需API Token，使用公開API
   },
 

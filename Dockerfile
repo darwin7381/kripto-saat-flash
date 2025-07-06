@@ -55,8 +55,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 USER nextjs
 
 # 暴露端口
-EXPOSE 3000
+EXPOSE 8080
 ENV HOSTNAME="0.0.0.0"
 
-# 啟動應用
-CMD ["node", "server.js"] 
+# 啟動應用，監聽Cloud Run提供的$PORT環境變數
+CMD sh -c "PORT=${PORT:-8080} node server.js" 

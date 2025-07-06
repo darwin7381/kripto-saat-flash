@@ -118,7 +118,7 @@ export interface ApiResponse<T> {
   success: boolean;
   error?: string;
   message?: string;
-}
+} 
 
 // Strapi V5 標準響應格式
 export interface StrapiResponse<T> {

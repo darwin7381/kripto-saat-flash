@@ -23,6 +23,7 @@ export const revalidate = 30;
 export default async function FlashPage() {
   let initialFlashes: Flash[] = [];
   let hasMore = true;
+  let lastFlashDate: string | undefined;
   
   try {
     console.log('SSR: Fetching flashes via apiService (fetch-ponyfill)...');
@@ -35,6 +36,11 @@ export default async function FlashPage() {
     // ✅ apiService 直接返回 { flashes: [...], pagination: {...} } 格式
     initialFlashes = flashData.flashes;
     hasMore = flashData.pagination.hasNext;
+    
+    // 計算最後一篇快訊的發布日期（用於LoadMore日期比較）
+    if (initialFlashes.length > 0) {
+      lastFlashDate = initialFlashes[initialFlashes.length - 1].published_datetime;
+    }
     
     console.log('SSR: Loaded', initialFlashes.length, 'flashes, hasMore:', hasMore);
   } catch (error) {
@@ -74,6 +80,7 @@ export default async function FlashPage() {
             {/* 加載更多按鈕 - 客戶端組件 */}
             <LoadMoreButton 
               initialHasMore={hasMore}
+              lastFlashDate={lastFlashDate}
             />
           </div>
 
