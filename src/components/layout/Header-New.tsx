@@ -47,11 +47,54 @@ export default function HeaderNew() {
 
   // 載入狀態
   if (loading) {
-  return (
+    return (
       <div className="jeg_header normal">
-        <div className="jeg_topbar" style={{ backgroundColor: 'rgb(33, 33, 33)', height: '40px' }}>
+        {/* TopBar Skeleton */}
+        <div className="jeg_topbar hidden lg:block" style={{ backgroundColor: 'rgb(33, 33, 33)', height: '40px' }}>
+          <div className="max-w-[1200px] mx-auto px-[15px] h-full">
+            <div className="jeg_nav_row flex items-center justify-between h-full">
+              {/* Left - Weather Skeleton */}
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-16 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-20 h-4 bg-gray-600 rounded animate-pulse"></div>
+              </div>
+              {/* Right - Dark Mode Skeleton */}
+              <div className="w-8 h-8 bg-gray-600 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* MidBar Skeleton */}
+        <div className="hidden lg:block bg-white" style={{ height: '80px' }}>
           <div className="max-w-[1200px] mx-auto px-[15px] h-full flex items-center justify-center">
-            <span className="text-white text-sm">載入中...</span>
+            <div className="w-32 h-10 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* BottomBar Skeleton */}
+        <div className="jeg_bottombar jeg_navbar jeg_container jeg_navbar_wrapper jeg_navbar_normal bg-black lg:bg-white" 
+             style={{ height: '50px' }}>
+          <div className="max-w-[1200px] mx-auto px-[15px] h-full">
+            <div className="jeg_nav_row flex items-center justify-between h-full">
+              {/* Left - Hamburger Skeleton */}
+              <div className="w-6 h-6 bg-gray-300 lg:bg-gray-200 rounded animate-pulse"></div>
+              
+              {/* Center - Navigation/Logo Skeleton */}
+              <div className="flex items-center justify-center flex-1">
+                {/* Desktop Navigation Skeleton */}
+                <div className="hidden lg:flex items-center space-x-6">
+                  {[1,2,3,4,5,6].map((i) => (
+                    <div key={i} className="w-16 h-4 bg-gray-200 rounded animate-pulse"></div>
+                  ))}
+                </div>
+                {/* Mobile Logo Skeleton */}
+                <div className="lg:hidden w-24 h-6 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+              
+              {/* Right - Search Skeleton */}
+              <div className="w-6 h-6 bg-gray-300 lg:bg-gray-200 rounded animate-pulse"></div>
+            </div>
           </div>
         </div>
       </div>

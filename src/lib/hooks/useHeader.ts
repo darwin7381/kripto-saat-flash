@@ -14,7 +14,7 @@ export function useHeader() {
         setLoading(true);
         console.log('🔍 useHeader: 開始獲取 header 數據...');
         
-        const response = await fetch('/api/header');
+        const response = await fetch('/flash/api/header');
         console.log('🔍 useHeader: API 回應狀態:', response.status);
 
         if (!response.ok) {

@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
+import fetchPonyfill from 'fetch-ponyfill';
 
-const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+// 使用 fetch-ponyfill 解決 Cloud Run 環境下 Next.js undici polyfill 問題
+const { fetch } = fetchPonyfill();
+
+const STRAPI_URL = process.env.STRAPI_URL || 'https://str.kriptosaat.com';
 
 // 定義 Strapi 數據結構類型
 interface StrapiNavigationItem {
@@ -123,11 +127,12 @@ export async function GET() {
                 })) : []
           })) : [
         // 預設值
-        { text: '⚡️24/7 Flash Haberler', url: '/flash' },
-        { text: 'Bitcoin', url: '/category/bitcoin' },
-        { text: 'Ethereum/Solana', url: '/category/ethereum-solana' },
-        { text: 'Haberler', url: '/category/haberler' },
-        { text: 'Rehberler', url: '/rehberler' }
+        { text: 'Hey Hey', url: '#', hasDropdown: false, children: [] },
+        { text: '⚡24/7 Flash Haberler', url: '/flash', hasDropdown: false, children: [] },
+        { text: 'Bitcoin', url: '/bitcoin', hasDropdown: false, children: [] },
+        { text: 'Ethereum/Solana', url: '/ethereum-solana', hasDropdown: false, children: [] },
+        { text: 'Haberler', url: '/haberler', hasDropdown: false, children: [] },
+        { text: 'Rehberler', url: '/rehberler', hasDropdown: false, children: [] }
       ],
       enableSearch: strapiData?.enableSearch ?? true,
       searchPlaceholder: strapiData?.searchPlaceholder || 'Ara...',
@@ -149,12 +154,13 @@ export async function GET() {
 
     return NextResponse.json(headerData, {
       headers: {
-        // 遵循 Cloudflare-First 架構：永久快取策略
+        // 設置永久快取策略，提升性能
         'Cache-Control': 'public, max-age=31536000, immutable',
         'CDN-Cache-Control': 'public, max-age=31536000',
-        'Cache-Tag': 'header-config,header-navigation,header-global',
-        'X-Cache-Type': 'header',
+        'Cache-Tag': 'header-config,header-v2,header-navigation-new',
+        'X-Cache-Type': 'header-dynamic',
         'X-Cache-Generated': new Date().toISOString(),
+        'X-Navigation-Version': '2.0', // 版本號讓快取系統知道這是新版本
       },
     });
   } catch (error) {
@@ -173,11 +179,12 @@ export async function GET() {
         alt: 'Kripto Saat Dark Logo'
       },
       mainNavigation: [
-        { text: '⚡️24/7 Flash Haberler', url: '/flash' },
-        { text: 'Bitcoin', url: '/category/bitcoin' },
-        { text: 'Ethereum/Solana', url: '/category/ethereum-solana' },
-        { text: 'Haberler', url: '/category/haberler' },
-        { text: 'Rehberler', url: '/rehberler' }
+        { text: 'Hey Hey', url: '#', hasDropdown: false, children: [] },
+        { text: '⚡24/7 Flash Haberler', url: '/flash', hasDropdown: false, children: [] },
+        { text: 'Bitcoin', url: '/bitcoin', hasDropdown: false, children: [] },
+        { text: 'Ethereum/Solana', url: '/ethereum-solana', hasDropdown: false, children: [] },
+        { text: 'Haberler', url: '/haberler', hasDropdown: false, children: [] },
+        { text: 'Rehberler', url: '/rehberler', hasDropdown: false, children: [] }
       ],
       enableSearch: true,
       searchPlaceholder: 'Ara...',
@@ -192,10 +199,11 @@ export async function GET() {
         // 錯誤時也使用永久快取，確保系統穩定性
         'Cache-Control': 'public, max-age=31536000, immutable',
         'CDN-Cache-Control': 'public, max-age=31536000',
-        'Cache-Tag': 'header-config,header-fallback,header-global',
+        'Cache-Tag': 'header-config,header-v2,header-navigation-new,header-fallback',
         'X-Cache-Type': 'header-fallback',
         'X-Cache-Generated': new Date().toISOString(),
         'X-Cache-Error': 'strapi-unavailable',
+        'X-Navigation-Version': '2.0', // 確保fallback也是新版本
       },
     });
   }

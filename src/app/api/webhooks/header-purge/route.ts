@@ -20,8 +20,10 @@ export async function POST(request: NextRequest) {
     if (CLOUDFLARE_ZONE_ID && CLOUDFLARE_API_TOKEN) {
       await purgeCloudflareCache([
         'header-config',
-        'header-navigation', 
-        'header-global'
+        'header-v2',
+        'header-navigation-new', 
+        'header-global',
+        'header-fallback'
       ]);
     }
 
