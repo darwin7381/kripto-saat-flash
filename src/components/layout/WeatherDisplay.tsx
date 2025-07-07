@@ -29,18 +29,22 @@ export default function WeatherDisplay({ className = "" }: WeatherDisplayProps) 
     return date.toLocaleDateString('tr-TR', options);
   };
 
-  // 根據天氣狀況代碼獲取FontAwesome圖標 (使用更好看的圖標)
+  // 根據天氣狀況代碼獲取Unicode天氣圖標 (高質量emoji圖標)
   const getWeatherIcon = (conditionCode: number): string => {
-    // WeatherAPI condition codes mapping to better FontAwesome 4.7.0 icons
-    if (conditionCode === 1000) return 'fa-certificate'; // Sunny - 用放射狀圖標代表太陽
-    if ([1003, 1006, 1009].includes(conditionCode)) return 'fa-cloud'; // Cloudy variations
-    if ([1063, 1180, 1183, 1186, 1189, 1192, 1195, 1240, 1243, 1246].includes(conditionCode)) return 'fa-tint'; // Rainy - 水滴更直觀
-    if ([1066, 1069, 1072, 1114, 1117, 1210, 1213, 1216, 1219, 1222, 1225, 1237, 1249, 1252, 1255, 1258, 1261, 1264].includes(conditionCode)) return 'fa-asterisk'; // Snowy - 雪花用星號
-    if ([1087, 1273, 1276, 1279, 1282].includes(conditionCode)) return 'fa-bolt'; // Thunderstorm - 閃電
-    if ([1135, 1147].includes(conditionCode)) return 'fa-adjust'; // Mist/Fog - 半圓表示能見度低
+    // WeatherAPI condition codes mapping to Unicode weather emojis
+    if (conditionCode === 1000) return '☀️'; // Sunny
+    if ([1003].includes(conditionCode)) return '⛅'; // Partly cloudy
+    if ([1006, 1009].includes(conditionCode)) return '☁️'; // Cloudy
+    if ([1030].includes(conditionCode)) return '🌫️'; // Mist
+    if ([1063, 1180, 1183, 1186, 1189, 1192, 1195].includes(conditionCode)) return '🌧️'; // Light to heavy rain
+    if ([1240, 1243, 1246].includes(conditionCode)) return '🌦️'; // Rain showers
+    if ([1066, 1069, 1072, 1114, 1117, 1210, 1213, 1216, 1219, 1222, 1225].includes(conditionCode)) return '❄️'; // Snow
+    if ([1237, 1249, 1252, 1255, 1258, 1261, 1264].includes(conditionCode)) return '🌨️'; // Heavy snow
+    if ([1087, 1273, 1276, 1279, 1282].includes(conditionCode)) return '⛈️'; // Thunderstorm
+    if ([1135, 1147].includes(conditionCode)) return '🌫️'; // Fog
     
     // Default for unknown conditions
-    return 'fa-cloud';
+    return '☁️';
   };
 
   // 獲取天氣資訊
@@ -82,7 +86,9 @@ export default function WeatherDisplay({ className = "" }: WeatherDisplayProps) 
         {weather && (
           <>
             <div className="jeg_nav_item jeg_weather flex items-center space-x-1 text-sm">
-              <i className={`fa ${getWeatherIcon(weather.conditionCode)}`} title={`Weather: ${weather.condition}, Code: ${weather.conditionCode}`}></i>
+              <span className="weather-icon text-base" title={`Weather: ${weather.condition}, Code: ${weather.conditionCode}`}>
+                {getWeatherIcon(weather.conditionCode)}
+              </span>
               <span>{weather.temperature}°C {weather.location}</span>
             </div>
             
