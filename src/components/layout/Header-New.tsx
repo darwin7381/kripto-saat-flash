@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import WeatherDisplay from './WeatherDisplay';
 import DarkModeToggle from './DarkModeToggle';
 import MainNavigation from './MainNavigation';
@@ -65,10 +66,10 @@ export default function HeaderNew() {
       {/* jeg_header normal */}
       <div className="jeg_header normal">
         
-        {/* jeg_topbar - 恢復原本的黑底設計 */}
+        {/* jeg_topbar - 恢復原本的黑底設計，手機版隱藏 */}
         {headerData?.topBar?.enableTopBar && (
           <div 
-            className="jeg_topbar" 
+            className="jeg_topbar hidden lg:block" 
             style={{ 
               backgroundColor: headerData.topBar.backgroundColor || 'rgb(33, 33, 33)', 
               height: headerData.topBar.height || '40px', 
@@ -90,26 +91,44 @@ export default function HeaderNew() {
           </div>
         )}
 
-        {/* jeg_midbar - Logo */}
-        <Logo 
-          isDarkMode={isDarkMode} 
-          logoText={headerData?.logoText}
-          logoUrl={headerData?.logoUrl}
-          logoLight={headerData?.logoLight}
-          logoDark={headerData?.logoDark}
-                    />
+        {/* jeg_midbar - Logo，手機版隱藏 */}
+        <div className="hidden lg:block">
+          <Logo 
+            isDarkMode={isDarkMode} 
+            logoText={headerData?.logoText}
+            logoUrl={headerData?.logoUrl}
+            logoLight={headerData?.logoLight}
+            logoDark={headerData?.logoDark}
+          />
+        </div>
 
-        {/* jeg_bottombar - 精確復刻 */}
-        <div className="jeg_bottombar jeg_navbar jeg_container jeg_navbar_wrapper jeg_navbar_normal" 
-             style={{ backgroundColor: 'rgb(255, 255, 255)', height: '50px' }}>
-          <div className="max-w-[1200px] mx-auto px-[15px]">
+        {/* jeg_bottombar - 精確復刻，手機版全黑底 */}
+        <div className="jeg_bottombar jeg_navbar jeg_container jeg_navbar_wrapper jeg_navbar_normal bg-black lg:bg-white" 
+             style={{ height: '50px' }}>
+          <div className="max-w-[1200px] mx-auto px-[15px] h-full">
             <div className="jeg_nav_row flex items-center justify-between h-full">
               
               {/* Left - Hamburger Menu */}
               <HamburgerMenu onClick={openSidebar} />
 
-              {/* Center - Main Menu */}
-              <MainNavigation navigationItems={headerData?.mainNavigation} />
+              {/* Center - Main Menu (Desktop) / Logo (Mobile) */}
+              <div className="flex items-center justify-center flex-1">
+                {/* Desktop Navigation */}
+                <div className="hidden lg:block">
+                  <MainNavigation navigationItems={headerData?.mainNavigation} />
+                </div>
+                
+                {/* Mobile Logo */}
+                <div className="lg:hidden">
+                  <Link href={headerData?.logoUrl || "/"} className="flex items-center">
+                    <img 
+                      src={headerData?.logoDark?.url || "https://kriptosaat.com/wp-content/uploads/2025/06/5eca877f1b-1.png"}
+                      alt={headerData?.logoText || "Kripto Saat"}
+                      className="h-8 w-auto"
+                    />
+                  </Link>
+                </div>
+              </div>
 
               {/* Right - Search Icon */}
               {headerData?.enableSearch && (

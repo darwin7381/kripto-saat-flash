@@ -69,12 +69,11 @@ export default function SearchButton({ className = "", placeholder = "Ara..." }:
           {/* 搜尋按鈕 */}
           <button 
             onClick={handleSearchToggle}
-            className="search-icon hover:opacity-70 transition-opacity"
+            className="search-icon hover:opacity-70 transition-opacity text-white lg:text-gray-800"
             aria-label="Search Button"
             style={{
               backgroundColor: 'transparent',
               border: 'none',
-              color: 'rgb(33, 33, 33)',
               fontSize: '16px',
               cursor: 'pointer',
               padding: '8px'
