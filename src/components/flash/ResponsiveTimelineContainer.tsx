@@ -91,7 +91,7 @@ export default function ResponsiveTimelineContainer({
           {/* 日期標籤 - 條件性渲染：如果是第一個且設置了跳過，則不渲染 */}
           {!(skipFirstDateHeader && dateIndex === 0) && (
             <div 
-              className="sticky bg-[#f9f9f9] border-b border-[#e5e5e5] px-6 py-3"
+              className="sticky bg-[#f9f9f9] border-b border-[#e5e5e5] px-3 md:px-6 py-3"
               style={{ 
                 top: '56px',
                 zIndex: 40 - dateIndex  // 40, 39, 38... 確保低於 Header 的 z-50
@@ -105,13 +105,16 @@ export default function ResponsiveTimelineContainer({
           
           {/* 該日期的所有快訊 */}
           <div className="timeline-list">
-            {group.flashes.map((flash) => (
-              <ResponsiveTimelineCard 
-                key={flash.id} 
-                flash={flash} 
-                isImportant={flash.is_important || false}
-              />
-            ))}
+            {/* 中間值間距：桌面版 px-6，手機版 px-3 */}
+            <div className="px-3 md:px-6">
+              {group.flashes.map((flash) => (
+                <ResponsiveTimelineCard 
+                  key={flash.id} 
+                  flash={flash} 
+                  isImportant={flash.is_important || false}
+                />
+              ))}
+            </div>
           </div>
         </div>
       ))}

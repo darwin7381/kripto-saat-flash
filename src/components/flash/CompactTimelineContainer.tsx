@@ -18,8 +18,8 @@ export default function CompactTimelineContainer({ flashes }: CompactTimelineCon
 
   return (
     <div className="compact-timeline-container bg-white">
-      {/* 響應式間距：桌面版 px-6，手機版 px-2 */}
-      <div className="px-2 md:px-6">
+      {/* 中間值間距：桌面版 px-6，手機版 px-3 與響應式版本保持一致 */}
+      <div className="px-3 md:px-6">
         {sortedFlashes.map((flash) => (
           <CompactTimelineCard 
             key={flash.id} 

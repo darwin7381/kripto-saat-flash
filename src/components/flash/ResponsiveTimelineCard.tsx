@@ -210,7 +210,7 @@ export default function ResponsiveTimelineCard({ flash, isImportant = false }: R
         </div>
       </div>
 
-      {/* 手機版布局 - 類似相關快訊的設計 */}
+      {/* 手機版布局 - 類似相關快訊的設計，調整間距與緊湊版本保持一致 */}
       <div className="md:hidden relative py-4">
         {/* 垂直線 */}
         <div className="absolute left-[10px] top-0 bottom-0 w-[1px] bg-[#e8e8e8]"></div>
@@ -218,8 +218,8 @@ export default function ResponsiveTimelineCard({ flash, isImportant = false }: R
         {/* 圓點 */}
         <div className="absolute left-[7px] top-[20px] w-[7px] h-[7px] bg-[#dcdcdc] rounded-full z-10"></div>
         
-        {/* 內容 */}
-        <div className="pl-[30px] pr-4">
+        {/* 內容 - 調整左邊距與緊湊版本保持一致 */}
+        <div className="pl-[30px] pr-2">
           {/* 時間 - 第一行 */}
           <div className="text-[12px] text-[#999] mb-1">
             {formatTime(flash.published_datetime)}
