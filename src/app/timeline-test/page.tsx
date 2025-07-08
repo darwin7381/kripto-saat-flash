@@ -1,9 +1,8 @@
 import ClientLayout from '@/components/layout/ClientLayout';
 import { apiService } from '@/lib/api';
 import { Flash } from '@/types/flash';
-import { config } from '@/lib/config';
 import ResponsiveTimelineContainer from '@/components/flash/ResponsiveTimelineContainer';
-import CompactTimelineContainer from '@/components/flash/CompactTimelineContainer';
+import EmbedTimelineContainer from '@/components/flash/EmbedTimelineContainer';
 
 // 獲取快訊資料
 async function getFlashesForTest(): Promise<Flash[]> {
@@ -41,14 +40,14 @@ export default async function TimelineTestPage() {
           </div>
         </div>
 
-        {/* 緊湊版 Timeline - 沒有日期標籤，日期時間合併顯示 */}
+        {/* Embed Timeline - 沒有日期標籤，日期時間合併顯示 */}
         <div>
-          <h2 className="text-lg font-semibold text-[#333] mb-4 border-b pb-2">緊湊版 Timeline</h2>
+          <h2 className="text-lg font-semibold text-[#333] mb-4 border-b pb-2">Embed Timeline</h2>
           <p className="text-[#666] text-sm mb-4">
-            特點：沒有日期頂部標籤，只使用相關快訊的布局方式，日期和時間合併顯示（日期在前，時間在後）
+            特點：適合作為 embed widget 使用，沒有日期頂部標籤，只使用相關快訊的布局方式，日期和時間合併顯示（日期在前，時間在後）
           </p>
           <div className="bg-white rounded-lg">
-            <CompactTimelineContainer flashes={flashes.slice(0, 10)} />
+            <EmbedTimelineContainer flashes={flashes.slice(0, 10)} />
           </div>
         </div>
       </main>

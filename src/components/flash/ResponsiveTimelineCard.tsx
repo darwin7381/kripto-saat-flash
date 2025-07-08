@@ -13,6 +13,7 @@ interface ResponsiveTimelineCardProps {
 
 export default function ResponsiveTimelineCard({ flash, isImportant = false }: ResponsiveTimelineCardProps) {
   const [showImageModal, setShowImageModal] = useState(false);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
 
   // 格式化時間 - 只顯示時分
   const formatTime = (dateString: string) => {
@@ -102,7 +103,7 @@ export default function ResponsiveTimelineCard({ flash, isImportant = false }: R
           </Link>
 
           {/* 內容 */}
-          <div className="text-[14px] text-[#666] leading-[24px] mb-2">
+          <div className="text-[14px] text-[#666] leading-[24px] mb-2 whitespace-pre-wrap">
             {flash.content}
           </div>
 
@@ -225,9 +226,9 @@ export default function ResponsiveTimelineCard({ flash, isImportant = false }: R
             {formatTime(flash.published_datetime)}
           </div>
           
-          {/* 標題 - 第二行，與時間對齊 */}
+          {/* 標題 - 第二行，與時間對齊，統一樣式 */}
           <Link href={`/flash/${flash.slug}`}>
-            <h4 className={`text-[16px] font-normal leading-[1.5] mb-2 transition-colors ${
+            <h4 className={`text-[16px] font-medium mb-2 transition-colors ${
               isImportant 
                 ? 'text-[#FF6C47] hover:text-[#ff8866]' 
                 : 'text-[#333] hover:text-[#5B7BFF]'
@@ -236,11 +237,15 @@ export default function ResponsiveTimelineCard({ flash, isImportant = false }: R
             </h4>
           </Link>
           
-          {/* 摘要 */}
-          <p className="text-[14px] text-[#999] leading-[1.6] mb-2">
-            {flash.excerpt || flash.content.slice(0, 100)}
-            {(flash.excerpt || flash.content).length > 100 && '...'}
-          </p>
+          {/* 內容 - 統一樣式，手機版3行縮排+點擊展開 */}
+          <div 
+            className={`text-[14px] text-[#666] leading-[24px] mb-2 cursor-pointer whitespace-pre-wrap ${
+              !isContentExpanded ? 'line-clamp-3' : ''
+            }`}
+            onClick={() => setIsContentExpanded(!isContentExpanded)}
+          >
+            {flash.content}
+          </div>
 
           {/* 圖片 - 在標籤之前 */}
           {flash.featured_image && (

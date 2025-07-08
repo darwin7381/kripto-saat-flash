@@ -6,13 +6,14 @@ import Image from 'next/image';
 import { Flash } from '@/types/flash';
 import { ThumbsUp, ThumbsDown, Share2, ExternalLink } from 'lucide-react';
 
-interface CompactTimelineCardProps {
+interface EmbedTimelineCardProps {
   flash: Flash;
   isImportant?: boolean;
 }
 
-export default function CompactTimelineCard({ flash, isImportant = false }: CompactTimelineCardProps) {
+export default function EmbedTimelineCard({ flash, isImportant = false }: EmbedTimelineCardProps) {
   const [showImageModal, setShowImageModal] = useState(false);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
 
   // 格式化日期和時間 - 日期在前，時間在後，非今年顯示年份
   const formatDateTime = (dateString: string) => {
@@ -20,7 +21,7 @@ export default function CompactTimelineCard({ flash, isImportant = false }: Comp
       const date = new Date(dateString);
       // 檢查日期是否有效
       if (isNaN(date.getTime())) {
-        console.warn(`Invalid date in CompactTimelineCard: ${dateString}`);
+        console.warn(`Invalid date in EmbedTimelineCard: ${dateString}`);
         return '--/-- --:--'; // 返回默認格式
       }
       
@@ -91,9 +92,9 @@ export default function CompactTimelineCard({ flash, isImportant = false }: Comp
           {formatDateTime(flash.published_datetime)}
         </div>
         
-        {/* 標題 - 第二行，與時間對齊 */}
+        {/* 標題 - 第二行，與時間對齊，完全比照響應式版本 */}
         <Link href={`/flash/${flash.slug}`}>
-          <h4 className={`text-[16px] font-normal leading-[1.5] mb-2 transition-colors ${
+          <h4 className={`text-[16px] font-medium leading-[1.5] mb-2 transition-colors ${
             isImportant 
               ? 'text-[#FF6C47] hover:text-[#ff8866]' 
               : 'text-[#333] hover:text-[#5B7BFF]'
@@ -102,11 +103,21 @@ export default function CompactTimelineCard({ flash, isImportant = false }: Comp
           </h4>
         </Link>
         
-        {/* 摘要 */}
-        <p className="text-[14px] text-[#999] leading-[1.6] mb-2">
-          {flash.excerpt || flash.content.slice(0, 100)}
-          {(flash.excerpt || flash.content).length > 100 && '...'}
-        </p>
+        {/* 內容 - 統一樣式，所有版本都比照桌面版響應式 */}
+        {/* 桌面版：完整內容 */}
+        <div className="hidden md:block text-[14px] text-[#666] leading-[24px] mb-2 whitespace-pre-wrap">
+          {flash.content}
+        </div>
+        
+        {/* 手機版：3行縮排+點擊展開 */}
+        <div 
+          className={`md:hidden text-[14px] text-[#666] leading-[24px] mb-2 cursor-pointer whitespace-pre-wrap ${
+            !isContentExpanded ? 'line-clamp-3' : ''
+          }`}
+          onClick={() => setIsContentExpanded(!isContentExpanded)}
+        >
+          {flash.content}
+        </div>
 
         {/* 圖片 - 在標籤之前 */}
         {flash.featured_image && (

@@ -31,7 +31,6 @@ interface StrapiFlash {
   documentId: string;
   title: string;
   content: string;
-  excerpt?: string;
   slug: string;
   published_datetime: string;
   createdAt: string;
@@ -431,7 +430,6 @@ export class ApiService {
       id: flash.id,
       title: flash.title,
       content: flash.content,
-      excerpt: flash.excerpt,
       slug: flash.slug,
       published_datetime: flash.published_datetime,
       createdAt: flash.createdAt,

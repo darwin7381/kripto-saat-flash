@@ -2,7 +2,6 @@ export interface Flash {
   id: number;
   title: string;
   content: string;
-  excerpt?: string;
   slug: string;
   published_datetime: string;
   createdAt?: string;

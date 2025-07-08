@@ -42,11 +42,11 @@ export async function generateMetadata({ params }: FlashDetailPageProps): Promis
 
     return {
       title: `${flash.title} | Kripto Saat Flash`,
-      description: flash.excerpt,
+      description: flash.content.slice(0, 150) + (flash.content.length > 150 ? '...' : ''),
       keywords: [...flash.categories.map((c: Category) => c.name), ...flash.tags.map((t: TagType) => t.name)],
       openGraph: {
         title: flash.title,
-        description: flash.excerpt,
+        description: flash.content.slice(0, 150) + (flash.content.length > 150 ? '...' : ''),
         url: `${config.site.url}/flash/${flash.slug}`,
         siteName: config.site.name,
         type: 'article',
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: FlashDetailPageProps): Promis
       twitter: {
         card: 'summary_large_image',
         title: flash.title,
-        description: flash.excerpt,
+        description: flash.content.slice(0, 150) + (flash.content.length > 150 ? '...' : ''),
         images: flash.featured_image ? [flash.featured_image.url] : undefined,
       },
     };
@@ -121,7 +121,7 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: flash.title,
-    description: flash.excerpt,
+    description: flash.content.slice(0, 150) + (flash.content.length > 150 ? '...' : ''),
     image: flash.featured_image?.url,
     datePublished: flash.published_datetime,
     dateModified: flash.updatedAt,
@@ -342,8 +342,9 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
                           </Link>
                           
                           {/* 摘要 */}
-                          <p className="text-[14px] text-[#999] leading-[1.6]">
-                            {relatedFlash.excerpt || relatedFlash.content.slice(0, 100) + '...'}
+                          <p className="text-[14px] text-[#999] leading-[1.6] whitespace-pre-wrap">
+                            {relatedFlash.content.slice(0, 100)}
+                            {relatedFlash.content.length > 100 && '...'}
                           </p>
                         </div>
                       </div>

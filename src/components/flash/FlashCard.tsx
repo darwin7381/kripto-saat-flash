@@ -75,8 +75,9 @@ export function FlashCard({ flash, priority = false }: FlashCardProps) {
           )}
 
           {/* 摘要 */}
-          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
-            {flash.excerpt}
+          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 whitespace-pre-wrap">
+            {flash.content.slice(0, 150)}
+            {flash.content.length > 150 && '...'}
           </p>
 
           {/* 標籤 */}

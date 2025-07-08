@@ -2,13 +2,13 @@
 
 import React from 'react';
 import { Flash } from '@/types/flash';
-import CompactTimelineCard from './CompactTimelineCard';
+import EmbedTimelineCard from './EmbedTimelineCard';
 
-interface CompactTimelineContainerProps {
+interface EmbedTimelineContainerProps {
   flashes: Flash[];
 }
 
-export default function CompactTimelineContainer({ flashes }: CompactTimelineContainerProps) {
+export default function EmbedTimelineContainer({ flashes }: EmbedTimelineContainerProps) {
   // 按發布時間排序（最新的在前）
   const sortedFlashes = [...flashes].sort((a, b) => {
     const timeA = new Date(a.published_datetime).getTime();
@@ -17,11 +17,11 @@ export default function CompactTimelineContainer({ flashes }: CompactTimelineCon
   });
 
   return (
-    <div className="compact-timeline-container bg-white">
-      {/* 中間值間距：桌面版 px-6，手機版 px-3 與響應式版本保持一致 */}
+    <div className="embed-timeline-container bg-white">
+      {/* 中間值間距：桌面版 px-6，手機版 px-3 */}
       <div className="px-3 md:px-6">
         {sortedFlashes.map((flash) => (
-          <CompactTimelineCard 
+          <EmbedTimelineCard 
             key={flash.id} 
             flash={flash} 
             isImportant={flash.is_important || false}
