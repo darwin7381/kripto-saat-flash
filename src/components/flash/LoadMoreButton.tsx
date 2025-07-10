@@ -66,6 +66,7 @@ export default function LoadMoreButton({ initialHasMore, lastFlashDate }: LoadMo
           <ResponsiveTimelineContainer 
             flashes={newFlashes} 
             skipFirstDateHeader={shouldSkipFirstDateHeader()}
+            isFirstContainer={false}
           />
         </div>
       )}

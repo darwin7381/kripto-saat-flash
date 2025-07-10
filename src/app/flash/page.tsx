@@ -6,6 +6,7 @@ import ResponsiveTimelineContainer from '@/components/flash/ResponsiveTimelineCo
 import ClientLayout from '@/components/layout/ClientLayout';
 import LoadMoreButton from '@/components/flash/LoadMoreButton';
 import MarketSidebar from '@/components/market/MarketSidebar';
+import { ImportantFilterProvider } from '@/components/flash/ImportantFilterContext';
 
 export const metadata: Metadata = {
   title: '币世界快讯 - Kripto Saat',
@@ -73,15 +74,17 @@ export default async function FlashPage() {
             </div>
 
             {/* 快訊列表 - SSR 渲染內容 */}
-            <div className="bg-white rounded-lg mt-[-1px]">
-              <ResponsiveTimelineContainer flashes={initialFlashes} />
-            </div>
-            
-            {/* 加載更多按鈕 - 客戶端組件 */}
-            <LoadMoreButton 
-              initialHasMore={hasMore}
-              lastFlashDate={lastFlashDate}
-            />
+            <ImportantFilterProvider>
+              <div className="bg-white rounded-lg mt-[-1px]">
+                <ResponsiveTimelineContainer flashes={initialFlashes} isFirstContainer={true} />
+              </div>
+              
+              {/* 加載更多按鈕 - 客戶端組件 */}
+              <LoadMoreButton 
+                initialHasMore={hasMore}
+                lastFlashDate={lastFlashDate}
+              />
+            </ImportantFilterProvider>
           </div>
 
           {/* Right Sidebar - 混合渲染 */}

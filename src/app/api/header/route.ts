@@ -154,8 +154,8 @@ export async function GET() {
 
     return NextResponse.json(headerData, {
       headers: {
-        // 設置永久快取策略，提升性能
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        // ✅ 修正快取策略：瀏覽器不快取，CDN 永久快取（符合 Cloudflare-First 架構）
+        'Cache-Control': 'public, max-age=0, must-revalidate',
         'CDN-Cache-Control': 'public, max-age=31536000',
         'Cache-Tag': 'header-config,header-v2,header-navigation-new',
         'X-Cache-Type': 'header-dynamic',
@@ -196,8 +196,8 @@ export async function GET() {
       }
     }, {
       headers: {
-        // 錯誤時也使用永久快取，確保系統穩定性
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        // ✅ 修正快取策略：瀏覽器不快取，CDN 永久快取（符合 Cloudflare-First 架構）
+        'Cache-Control': 'public, max-age=0, must-revalidate',
         'CDN-Cache-Control': 'public, max-age=31536000',
         'Cache-Tag': 'header-config,header-v2,header-navigation-new,header-fallback',
         'X-Cache-Type': 'header-fallback',

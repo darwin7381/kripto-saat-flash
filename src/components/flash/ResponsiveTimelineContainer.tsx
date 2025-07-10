@@ -1,14 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Flash } from '@/types/flash';
 import ResponsiveTimelineCard from './ResponsiveTimelineCard';
+import ToggleSwitch from '@/components/ui/toggle-switch';
+import { useImportantFilter } from './ImportantFilterContext';
 import { format } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 
 interface ResponsiveTimelineContainerProps {
   flashes: Flash[];
   skipFirstDateHeader?: boolean;
+  isFirstContainer?: boolean; // 標識這是否是第一個容器（不是加載更多的）
 }
 
 // 將日期格式化為標準格式
@@ -88,9 +91,48 @@ const groupFlashesByDate = (flashes: Flash[]) => {
 
 export default function ResponsiveTimelineContainer({ 
   flashes, 
-  skipFirstDateHeader = false 
+  skipFirstDateHeader = false,
+  isFirstContainer = false 
 }: ResponsiveTimelineContainerProps) {
-  const groupedFlashes = groupFlashesByDate(flashes);
+  const { showImportantOnly, setShowImportantOnly } = useImportantFilter();
+  const [stickyDateIndex, setStickyDateIndex] = useState(-1); // 追蹤當前置頂的日期標索引，-1表示沒有置頂
+  const dateHeaderRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // 根據開關狀態篩選快訊
+  const filteredFlashes = showImportantOnly 
+    ? flashes.filter(flash => flash.is_important || flash.isImportant)
+    : flashes;
+  
+  const groupedFlashes = groupFlashesByDate(filteredFlashes);
+  
+  // 檢測置頂狀態的滾動監聽器
+  useEffect(() => {
+    const handleScroll = () => {
+      const headerHeight = 56; // Header 高度
+      
+      // 遍歷所有日期標，找出當前置頂的
+      for (let i = 0; i < dateHeaderRefs.current.length; i++) {
+        const header = dateHeaderRefs.current[i];
+        if (header) {
+          const rect = header.getBoundingClientRect();
+          // 如果日期標在置頂位置（考慮 header 高度）
+          if (rect.top <= headerHeight && rect.bottom > headerHeight) {
+            setStickyDateIndex(i);
+            break;
+          }
+        }
+      }
+    };
+    
+    // 添加滾動監聽器
+    window.addEventListener('scroll', handleScroll);
+    // 初始化檢測
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [groupedFlashes.length]);
   
   return (
     <div className="responsive-timeline-container bg-white">
@@ -99,15 +141,28 @@ export default function ResponsiveTimelineContainer({
           {/* 日期標籤 - 條件性渲染：如果是第一個且設置了跳過，則不渲染 */}
           {!(skipFirstDateHeader && dateIndex === 0) && (
             <div 
+              ref={(el) => {
+                dateHeaderRefs.current[dateIndex] = el;
+              }}
               className="sticky bg-[#f9f9f9] border-b border-[#e5e5e5] px-3 md:px-6 py-3"
               style={{ 
                 top: '56px',
                 zIndex: 40 - dateIndex  // 40, 39, 38... 確保低於 Header 的 z-50
               }}
             >
-              <span className="text-[#333] text-sm font-medium">
-                {formatDateLabel(group.date)}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[#333] text-sm font-medium">
+                  {formatDateLabel(group.date)}
+                </span>
+                {/* 只有第一個容器的第一個日期標籤永遠顯示開關，或者當前置頂的日期標籤顯示開關 */}
+                {((isFirstContainer && dateIndex === 0) || dateIndex === stickyDateIndex) && (
+                  <ToggleSwitch
+                    label="只看重要"
+                    checked={showImportantOnly}
+                    onChange={setShowImportantOnly}
+                  />
+                )}
+              </div>
             </div>
           )}
           
