@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   // 啟用 standalone 模式（Cloud Run 需要）
   output: 'standalone',
   
+  // 路由架構說明：
+  // - 不使用 Next.js basePath，採用 Worker 轉發 + 文件位置管理
+  // - API 路由：/flash/api/* → Worker 轉發為 /api/* → Next.js 處理
+  // - 頁面路由：/flash/* → Worker 保持路徑 → Next.js /flash/* 文件處理
+  // basePath: process.env.NODE_ENV === 'production' ? '/flash' : '',
+  
   // 基本安全 headers
   async headers() {
     return [

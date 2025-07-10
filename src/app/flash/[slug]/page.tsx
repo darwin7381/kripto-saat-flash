@@ -11,6 +11,7 @@ import { apiService } from '@/lib/api';
 import ClientLayout from '@/components/layout/ClientLayout';
 import MarketSidebar from '@/components/market/MarketSidebar';
 import FlashImageViewer from '@/components/flash/FlashImageViewer';
+import EmbedTimelineContainer from '@/components/flash/EmbedTimelineContainer';
 
 interface FlashDetailPageProps {
   params: Promise<{
@@ -84,14 +85,14 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
   const decodedSlug = decodeURIComponent(slug);
   
   // 使用 API 服務獲取快訊
-  const flash = await apiService.getFlash(decodedSlug);
+  const flash: Flash | null = await apiService.getFlash(decodedSlug);
 
   if (!flash) {
     notFound();
   }
 
   // 獲取相關快訊
-  const relatedFlashes = await apiService.getRelatedFlashes(flash.id, 5);
+  const relatedFlashes: Flash[] = await apiService.getRelatedFlashes(flash.id, 5);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -304,53 +305,7 @@ export default async function FlashDetailPage({ params }: FlashDetailPageProps) 
                 <div className="px-6 py-4 border-b border-[#e8e8e8]">
                   <h3 className="text-[16px] font-normal text-[#333]">相關快訊</h3>
                 </div>
-                <div className="px-6">
-                  {relatedFlashes.slice(0, 5).map((relatedFlash: Flash) => {
-                    const formatTime = (dateString: string) => {
-                      const date = new Date(dateString);
-                      return date.toLocaleTimeString('zh-CN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit', 
-                        hour12: false 
-                      });
-                    };
-
-                    return (
-                      <div key={relatedFlash.id} className="relative py-4">
-                        {/* 垂直線 */}
-                        <div className="absolute left-[10px] top-0 bottom-0 w-[1px] bg-[#e8e8e8]"></div>
-                        
-                        {/* 圓點 */}
-                        <div className="absolute left-[7px] top-[20px] w-[7px] h-[7px] bg-[#dcdcdc] rounded-full z-10"></div>
-                        
-                        {/* 內容 */}
-                        <div className="pl-[30px]">
-                          {/* 時間 - 第一行 */}
-                          <div className="text-[12px] text-[#999] mb-1">
-                            {formatTime(relatedFlash.published_datetime)}
-                          </div>
-                          
-                          {/* 標題 - 第二行，與時間對齊 */}
-                          <Link href={`/flash/${relatedFlash.slug}`}>
-                            <h4 className={`text-[16px] font-normal leading-[1.5] mb-2 transition-colors ${
-                              relatedFlash.is_important 
-                                ? 'text-[#FF6C47] hover:text-[#ff8866]' 
-                                : 'text-[#333] hover:text-[#5B7BFF]'
-                            }`}>
-                              {relatedFlash.title}
-                            </h4>
-                          </Link>
-                          
-                          {/* 摘要 */}
-                          <p className="text-[14px] text-[#999] leading-[1.6] whitespace-pre-wrap">
-                            {relatedFlash.content.slice(0, 100)}
-                            {relatedFlash.content.length > 100 && '...'}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <EmbedTimelineContainer flashes={relatedFlashes.slice(0, 5)} />
               </div>
             )}
           </div>

@@ -23,6 +23,12 @@ export const config = {
     apiUrl: process.env.WORDPRESS_API_URL || 'http://localhost:8080/wp-json/wp/v2',
   },
 
+  // App Configuration
+  // 注意：不使用 Next.js basePath，路由結構通過 Cloudflare Worker 和文件位置處理
+  app: {
+    // basePath 已禁用，使用 Worker 路由轉發 + 文件位置管理路由
+  },
+
   // Site Configuration
   site: {
     url: process.env.SITE_URL || 'http://localhost:3000',

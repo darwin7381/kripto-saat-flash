@@ -2,7 +2,7 @@ import { apiService } from '@/lib/api';
 import { config } from '@/lib/config';
 import { Metadata } from 'next';
 import { Flash } from '@/types/flash';
-import FlashListContainer from '@/components/flash/FlashListContainer';
+import ResponsiveTimelineContainer from '@/components/flash/ResponsiveTimelineContainer';
 import ClientLayout from '@/components/layout/ClientLayout';
 import LoadMoreButton from '@/components/flash/LoadMoreButton';
 import MarketSidebar from '@/components/market/MarketSidebar';
@@ -74,7 +74,7 @@ export default async function FlashPage() {
 
             {/* 快訊列表 - SSR 渲染內容 */}
             <div className="bg-white rounded-lg mt-[-1px]">
-              <FlashListContainer flashes={initialFlashes} />
+              <ResponsiveTimelineContainer flashes={initialFlashes} />
             </div>
             
             {/* 加載更多按鈕 - 客戶端組件 */}

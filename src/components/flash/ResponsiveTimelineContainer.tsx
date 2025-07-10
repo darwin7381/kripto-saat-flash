@@ -14,22 +14,30 @@ interface ResponsiveTimelineContainerProps {
 // 將日期格式化為標準格式
 const formatDateLabel = (date: Date): string => {
   const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
   
-  // 比較日期（只比較年月日）
-  const isToday = date.toDateString() === today.toDateString();
-  const isYesterday = date.toDateString() === yesterday.toDateString();
+  // 計算日期差異（只比較年月日）
+  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const timeDiff = todayDate.getTime() - targetDate.getTime();
+  const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   
   // 格式化基本日期
   const dateStr = format(date, 'MM月dd日', { locale: zhTW });
   const weekDay = format(date, 'EEEE', { locale: zhTW });
   
-  if (isToday) {
-    return `今天，${dateStr} ${weekDay}`;
-  } else if (isYesterday) {
-    return `昨天，${dateStr} ${weekDay}`;
+  // 根據日期差異顯示不同的前綴
+  if (daysDiff === 0) {
+    return `今天 | ${dateStr} ${weekDay}`;
+  } else if (daysDiff === 1) {
+    return `昨天 | ${dateStr} ${weekDay}`;
+  } else if (daysDiff === 2) {
+    return `1 天前 | ${dateStr} ${weekDay}`;
+  } else if (daysDiff === 3) {
+    return `2 天前 | ${dateStr} ${weekDay}`;
+  } else if (daysDiff === 4) {
+    return `3 天前 | ${dateStr} ${weekDay}`;
   } else {
+    // 超過 3 天前就不加前綴
     return `${dateStr} ${weekDay}`;
   }
 };

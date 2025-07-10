@@ -14,7 +14,11 @@ export function useHeader() {
         setLoading(true);
         console.log('🔍 useHeader: 開始獲取 header 數據...');
         
-        const response = await fetch('/flash/api/header');
+        // 根據環境調整 API 路徑
+        // 本地端：/api/header（直接訪問）
+        // 生產環境：/flash/api/header（透過 Cloudflare Worker 轉換為 /api/header）
+        const apiPath = process.env.NODE_ENV === 'production' ? '/flash/api/header' : '/api/header';
+        const response = await fetch(apiPath);
         console.log('🔍 useHeader: API 回應狀態:', response.status);
 
         if (!response.ok) {

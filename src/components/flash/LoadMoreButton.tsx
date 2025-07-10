@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { apiService } from '@/lib/api';
 import { Flash } from '@/types/flash';
-import FlashListContainer from './FlashListContainer';
+import ResponsiveTimelineContainer from './ResponsiveTimelineContainer';
 
 interface LoadMoreButtonProps {
   initialHasMore: boolean;
@@ -63,7 +63,7 @@ export default function LoadMoreButton({ initialHasMore, lastFlashDate }: LoadMo
       {/* 動態載入的快訊 */}
       {newFlashes.length > 0 && (
         <div className="bg-white rounded-lg mt-[-1px]">
-          <FlashListContainer 
+          <ResponsiveTimelineContainer 
             flashes={newFlashes} 
             skipFirstDateHeader={shouldSkipFirstDateHeader()}
           />
