@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "幣世界 - 比特幣等數字貨幣交易所導航、投資理財、快訊、深度、幣圈、市場行情第一站",
-  description: "幣世界網-比特幣等數字貨幣交易所導航、投資理財、快訊、深度、幣圈、市場行情第一站。",
+  title: "Kripto Saat - 土耳其領先的數字貨幣投資理財、快訊、深度分析、市場行情資訊平台",
+  description: "Kripto Saat - 土耳其領先的比特幣等數字貨幣投資理財、快訊、深度分析、市場行情資訊平台。",
 };
 
 export default function RootLayout({

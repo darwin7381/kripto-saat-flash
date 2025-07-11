@@ -100,7 +100,7 @@ export default function ResponsiveTimelineContainer({
   
   // 根據開關狀態篩選快訊
   const filteredFlashes = showImportantOnly 
-    ? flashes.filter(flash => flash.is_important || flash.isImportant)
+    ? flashes.filter(flash => flash.is_important)
     : flashes;
   
   const groupedFlashes = groupFlashesByDate(filteredFlashes);

@@ -32,7 +32,6 @@ export interface Flash {
     bullish_count?: number;
     bearish_count?: number;
   };
-  isImportant?: boolean;
 }
 
 export interface Author {
